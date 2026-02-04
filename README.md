@@ -30,12 +30,21 @@ A web platform where users submit Lean statements (problems) and other users sub
 ### 1. Set up Lean 4 Project with Mathlib
 
 ```bash
-# Create a Lean 4 project with Mathlib
-lake +leanprover-lean4:v4.x.0 new prove2me_lean math
+# Option A: Use the Mathlib project template (recommended)
+git clone https://github.com/leanprover-community/mathlib4.git prove2me_lean
 cd prove2me_lean
+lake exe cache get  # Download pre-built Mathlib cache
+lake build          # Build the project
+
+# Option B: Create a new project that depends on Mathlib
+mkdir prove2me_lean && cd prove2me_lean
+lake init prove2me_lean math
 lake update
-lake build  # Initial build (takes time)
+lake exe cache get  # Download pre-built Mathlib cache (much faster than building)
+lake build
 ```
+
+**Note**: The `lake exe cache get` command downloads pre-compiled Mathlib binaries, which is much faster than compiling from source.
 
 ### 2. Set up PostgreSQL Database
 

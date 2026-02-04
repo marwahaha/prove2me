@@ -40,3 +40,6 @@ logs/
 
 # Alembic
 alembic/versions/*.pyc
+
+#lean server
+prove2me_lean/*

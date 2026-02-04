@@ -1,0 +1,131 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { statementsApi } from '../api/client';
+import CodeEditor from '../components/CodeEditor';
+import toast from 'react-hot-toast';
+
+export default function SubmitStatement() {
+  const [title, setTitle] = useState('');
+  const [leanCode, setLeanCode] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [compiling, setCompiling] = useState(false);
+  const [compileError, setCompileError] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  const handleCompileTest = async () => {
+    if (!leanCode.trim()) {
+      toast.error('Please enter some Lean code');
+      return;
+    }
+
+    setCompiling(true);
+    setCompileError(null);
+
+    try {
+      const result = await statementsApi.compile(title, leanCode);
+      if (result.success) {
+        toast.success('Code compiles successfully!');
+      } else {
+        setCompileError(result.error || 'Compilation failed');
+        toast.error('Compilation failed');
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to compile');
+    } finally {
+      setCompiling(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!title.trim() || !leanCode.trim()) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const statement = await statementsApi.create(title, leanCode);
+      toast.success('Statement submitted successfully!');
+      navigate(`/statement/${statement.id}`);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to submit statement');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="container main-content">
+      <div className="page-header">
+        <h1 className="page-title">Submit Lean Statement</h1>
+      </div>
+
+      <div className="card">
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="title">Title</label>
+            <input
+              type="text"
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g., Prove that sqrt(2) is irrational"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Lean Code</label>
+            <CodeEditor
+              value={leanCode}
+              onChange={setLeanCode}
+              placeholder="-- Enter your Lean statement here
+-- Example:
+theorem sqrt_two_irrational : Irrational (Real.sqrt 2) := by
+  sorry"
+            />
+          </div>
+
+          {compileError && (
+            <div className="error-message">
+              <strong>Compilation Error:</strong>
+              <pre style={{ marginTop: '10px', whiteSpace: 'pre-wrap' }}>{compileError}</pre>
+            </div>
+          )}
+
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={handleCompileTest}
+              disabled={compiling || loading}
+            >
+              {compiling ? 'Compiling...' : 'Test Compile'}
+            </button>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={loading || compiling}
+            >
+              {loading ? 'Submitting...' : 'Submit Statement'}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div className="card" style={{ marginTop: '20px' }}>
+        <h3 style={{ marginBottom: '15px' }}>Guidelines</h3>
+        <ul style={{ paddingLeft: '20px' }}>
+          <li>Your statement must compile (using <code>sorry</code> is allowed)</li>
+          <li>Make sure the statement is well-formed and provable</li>
+          <li>You can import Mathlib modules if needed</li>
+          <li>The prize increases over time until someone solves it</li>
+          <li>You'll earn 20% of the prize when someone proves your statement</li>
+        </ul>
+      </div>
+    </div>
+  );
+}

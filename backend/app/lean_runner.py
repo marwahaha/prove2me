@@ -100,37 +100,43 @@ def compile_statement(statement_code: str, definitions: str = None) -> tuple[boo
     return True, ""
 
 
-def compile_proof(statement_code: str, proof_code: str, definitions: str = None) -> tuple[bool, str]:
+def compile_proof(statement_code: str, proof_code: str, theorem_name: str, definitions: str = None) -> tuple[bool, str]:
     """
     Validate a proof:
     1. Must be valid Lean syntax
-    2. Must have type exactly matching the statement
-    3. Cannot contain 'sorry'
+    2. Must not contain 'sorry'
+    3. The specified theorem must have type exactly matching the statement
 
-    The user submits a proof term that should have the type of the statement.
+    The user submits full Lean code and specifies which theorem proves the statement.
     """
     # Check for sorry in the proof
     if "sorry" in proof_code:
         return False, "Proof cannot contain 'sorry'"
 
-    # Build the code with optional definitions
+    # Build the code with optional definitions from the statement
     definitions_block = definitions.strip() + "\n\n" if definitions and definitions.strip() else ""
 
-    # Wrap to verify the proof has the exact type of the statement
+    # First, compile the user's proof code to make sure it compiles
+    # Then check that the theorem has the correct type
     wrapped_code = f"""import Mathlib
 
-{definitions_block}-- The statement (proposition to prove)
+{definitions_block}-- User's proof code
+{proof_code}
+
+-- The statement (proposition to prove)
 def _statement : Prop := {statement_code}
 
--- Verify the proof has exactly the type of the statement
-#check ({proof_code} : _statement)
+-- Verify the theorem has exactly the type of the statement
+#check ({theorem_name} : _statement)
 """
 
     success, error = run_lean(wrapped_code)
 
     if not success:
         if "type mismatch" in error.lower():
-            return False, "Proof type does not match the statement"
+            return False, f"Theorem '{theorem_name}' does not have the correct type"
+        if "unknown identifier" in error.lower() or "unknown constant" in error.lower():
+            return False, f"Theorem '{theorem_name}' not found in the proof code"
         return False, error
 
     return True, ""

@@ -43,8 +43,13 @@ def submit_proof(
             detail="Cannot submit proof to your own statement"
         )
 
-    # Compile statement + proof (no sorry allowed)
-    success, error = compile_proof(statement.lean_code, proof_data.lean_code, statement.definitions)
+    # Compile proof and verify theorem has correct type (no sorry allowed)
+    success, error = compile_proof(
+        statement.lean_code,
+        proof_data.lean_code,
+        proof_data.theorem_name,
+        statement.definitions
+    )
 
     if not success:
         return ProofResult(
@@ -62,6 +67,7 @@ def submit_proof(
     statement.solved_at = datetime.utcnow()
     statement.solver_id = current_user.id
     statement.proof_code = proof_data.lean_code
+    statement.proof_theorem_name = proof_data.theorem_name
 
     # Award points
     current_user.points += prover_share

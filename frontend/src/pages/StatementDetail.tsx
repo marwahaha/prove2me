@@ -11,6 +11,7 @@ export default function StatementDetail() {
   const [statement, setStatement] = useState<Statement | null>(null);
   const [loading, setLoading] = useState(true);
   const [proofCode, setProofCode] = useState('');
+  const [theoremName, setTheoremName] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [proofResult, setProofResult] = useState<{ success: boolean; message: string } | null>(null);
 
@@ -39,11 +40,16 @@ export default function StatementDetail() {
       return;
     }
 
+    if (!theoremName.trim()) {
+      toast.error('Please enter the theorem name');
+      return;
+    }
+
     setSubmitting(true);
     setProofResult(null);
 
     try {
-      const result = await proofsApi.submit(id, proofCode);
+      const result = await proofsApi.submit(id, proofCode, theoremName.trim());
       setProofResult(result);
 
       if (result.success) {
@@ -113,11 +119,16 @@ export default function StatementDetail() {
             Solved by {statement.solver?.username} on {new Date(statement.solved_at!).toLocaleDateString()}
           </div>
           <h3 style={{ marginBottom: '10px' }}>Proof</h3>
+          {statement.proof_theorem_name && (
+            <p style={{ marginBottom: '10px', color: '#666' }}>
+              Theorem: <code>{statement.proof_theorem_name}</code>
+            </p>
+          )}
           <CodeEditor
             value={statement.proof_code || ''}
             onChange={() => {}}
             readOnly
-            height="200px"
+            height="300px"
           />
         </div>
       ) : isOwnStatement ? (
@@ -136,16 +147,33 @@ export default function StatementDetail() {
 
           <form onSubmit={handleSubmitProof}>
             <div className="form-group">
-              <label>Proof Code</label>
+              <label>Lean Code</label>
               <CodeEditor
                 value={proofCode}
                 onChange={setProofCode}
-                placeholder="-- Enter a proof term for the proposition above
--- Examples:
--- fun n => Nat.add_zero n
--- Nat.add_comm
--- by simp [Nat.add_comm]"
+                placeholder="-- Write your proof here
+-- You can include helper lemmas, definitions, etc.
+-- Example:
+theorem my_proof : ∀ n : Nat, n + 0 = n := by
+  intro n
+  simp"
+                height="300px"
               />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="theoremName">Theorem Name</label>
+              <input
+                type="text"
+                id="theoremName"
+                value={theoremName}
+                onChange={(e) => setTheoremName(e.target.value)}
+                placeholder="e.g., my_proof"
+                required
+              />
+              <small style={{ color: '#666', display: 'block', marginTop: '5px' }}>
+                The name of the theorem in your code that proves the proposition
+              </small>
             </div>
 
             <button
@@ -158,8 +186,8 @@ export default function StatementDetail() {
           </form>
 
           <div style={{ marginTop: '20px', color: '#666' }}>
-            <strong>Note:</strong> Submit a proof term whose type exactly matches the proposition.
-            You can use tactic proofs with <code>by ...</code>. Cannot contain <code>sorry</code>.
+            <strong>Note:</strong> Your Lean code must compile without errors and cannot contain <code>sorry</code>.
+            The specified theorem must have a type that exactly matches the proposition above.
           </div>
         </div>
       ) : (

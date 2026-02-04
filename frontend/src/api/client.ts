@@ -165,6 +165,12 @@ export const adminApi = {
       method: 'DELETE',
     }),
 
+  resetPassword: (userId: string, newPassword: string) =>
+    request<User>(`/admin/reset-password/${userId}`, {
+      method: 'POST',
+      body: JSON.stringify({ new_password: newPassword }),
+    }),
+
   getSettings: () => request<PrizeSettings>('/admin/settings'),
 
   updateSettings: (settings: Partial<PrizeSettings>) =>

@@ -67,6 +67,23 @@ export default function Admin() {
     }
   };
 
+  const handleResetPassword = async (userId: string, username: string) => {
+    const newPassword = prompt(`Enter new password for ${username}:`);
+    if (!newPassword) return;
+
+    if (newPassword.length < 6) {
+      toast.error('Password must be at least 6 characters');
+      return;
+    }
+
+    try {
+      await adminApi.resetPassword(userId, newPassword);
+      toast.success(`Password reset for ${username}`);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to reset password');
+    }
+  };
+
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     setSavingSettings(true);
@@ -173,6 +190,7 @@ export default function Admin() {
                   <th>Points</th>
                   <th>Status</th>
                   <th>Registered</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -190,6 +208,14 @@ export default function Admin() {
                       </span>
                     </td>
                     <td>{new Date(user.created_at).toLocaleDateString()}</td>
+                    <td>
+                      <button
+                        className="btn btn-secondary btn-small"
+                        onClick={() => handleResetPassword(user.id, user.username)}
+                      >
+                        Reset Password
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>

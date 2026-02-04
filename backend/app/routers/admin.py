@@ -5,8 +5,8 @@ from typing import List
 from uuid import UUID
 from ..database import get_db
 from ..models import User, Statement
-from ..schemas import UserResponse, SettingsResponse, SettingsUpdate, StatementListItem
-from ..auth import get_current_admin
+from ..schemas import UserResponse, SettingsResponse, SettingsUpdate, StatementListItem, PasswordReset
+from ..auth import get_current_admin, hash_password
 from ..prize import get_prize_settings, set_prize_setting
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
@@ -47,6 +47,35 @@ def approve_user(
         )
 
     user.is_approved = True
+    db.commit()
+    db.refresh(user)
+
+    return user
+
+
+@router.post("/reset-password/{user_id}", response_model=UserResponse)
+def reset_password(
+    user_id: UUID,
+    password_data: PasswordReset,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Reset a user's password."""
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+
+    if len(password_data.new_password) < 6:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password must be at least 6 characters"
+        )
+
+    user.password_hash = hash_password(password_data.new_password)
     db.commit()
     db.refresh(user)
 

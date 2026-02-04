@@ -97,6 +97,10 @@ class LeaderboardEntry(BaseModel):
 
 
 # Admin schemas
+class PasswordReset(BaseModel):
+    new_password: str
+
+
 class SettingsResponse(BaseModel):
     base_points: int
     growth_rate: float

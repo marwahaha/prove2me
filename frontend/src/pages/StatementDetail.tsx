@@ -81,7 +81,6 @@ export default function StatementDetail() {
   }
 
   const isOwnStatement = user && statement.submitter.id === user.id;
-  const canSubmitProof = user && !statement.is_solved && !isOwnStatement;
 
   return (
     <div className="container main-content">

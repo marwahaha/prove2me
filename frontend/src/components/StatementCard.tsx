@@ -33,8 +33,10 @@ export default function StatementCard({ statement }: StatementCardProps) {
         )}
       </div>
       <div className="statement-meta">
-        <span>by {statement.submitter.username}</span>
-        <span>{formatTimeAgo(statement.created_at)}</span>
+        <span>submitted by {statement.submitter.username} {formatTimeAgo(statement.created_at)}</span>
+        {statement.is_solved && statement.solver && statement.solved_at && (
+          <span>solved by {statement.solver.username} {formatTimeAgo(statement.solved_at)}</span>
+        )}
       </div>
     </div>
   );

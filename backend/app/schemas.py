@@ -41,17 +41,20 @@ class UserPublic(BaseModel):
 # Statement schemas
 class StatementCreate(BaseModel):
     title: str
+    definitions: Optional[str] = None
     lean_code: str
 
 
 class StatementResponse(BaseModel):
     id: UUID
     title: str
+    definitions: Optional[str] = None
     lean_code: str
     submitter: UserPublic
     is_solved: bool
     solved_at: Optional[datetime]
     solver: Optional[UserPublic]
+    proof_code: Optional[str] = None
     created_at: datetime
     current_prize: Optional[int] = None
 
@@ -64,7 +67,9 @@ class StatementListItem(BaseModel):
     title: str
     submitter: UserPublic
     is_solved: bool
+    solver: Optional[UserPublic] = None
     created_at: datetime
+    solved_at: Optional[datetime] = None
     current_prize: Optional[int] = None
 
     class Config:

@@ -7,6 +7,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import SubmitStatement from './pages/SubmitStatement';
 import StatementDetail from './pages/StatementDetail';
+import Solved from './pages/Solved';
 import Leaderboard from './pages/Leaderboard';
 import Profile from './pages/Profile';
 import Admin from './pages/Admin';
@@ -45,6 +46,14 @@ function App() {
           element={
             <ProtectedRoute>
               <StatementDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/solved"
+          element={
+            <ProtectedRoute>
+              <Solved />
             </ProtectedRoute>
           }
         />

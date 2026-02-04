@@ -44,7 +44,7 @@ def submit_proof(
         )
 
     # Compile statement + proof (no sorry allowed)
-    success, error = compile_proof(statement.lean_code, proof_data.lean_code)
+    success, error = compile_proof(statement.lean_code, proof_data.lean_code, statement.definitions)
 
     if not success:
         return ProofResult(
@@ -61,6 +61,7 @@ def submit_proof(
     statement.is_solved = True
     statement.solved_at = datetime.utcnow()
     statement.solver_id = current_user.id
+    statement.proof_code = proof_data.lean_code
 
     # Award points
     current_user.points += prover_share

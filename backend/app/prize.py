@@ -39,7 +39,13 @@ def calculate_prize(statement_created_at: datetime, settings: dict) -> int:
     base = settings['base_points']
     rate = settings['growth_rate']
 
-    days_elapsed = (datetime.utcnow() - statement_created_at).total_seconds() / 86400
+    seconds_elapsed = (datetime.utcnow() - statement_created_at).total_seconds()
+
+    # Ensure non-negative (in case of clock skew)
+    if seconds_elapsed < 0:
+        seconds_elapsed = 0
+
+    days_elapsed = seconds_elapsed / 86400
     prize = base * (rate ** days_elapsed)
 
     return int(prize)

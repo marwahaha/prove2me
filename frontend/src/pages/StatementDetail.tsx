@@ -95,13 +95,30 @@ export default function StatementDetail() {
           )}
         </div>
 
-        <h3 style={{ marginBottom: '10px' }}>Statement Code</h3>
+        {statement.definitions && (
+          <>
+            <h3 style={{ marginBottom: '10px' }}>Definitions</h3>
+            <CodeEditor value={statement.definitions} onChange={() => {}} readOnly height="150px" />
+            <div style={{ marginTop: '20px' }} />
+          </>
+        )}
+
+        <h3 style={{ marginBottom: '10px' }}>Proposition</h3>
         <CodeEditor value={statement.lean_code} onChange={() => {}} readOnly height="200px" />
       </div>
 
       {statement.is_solved ? (
-        <div className="success-message">
-          This statement has been solved by {statement.solver?.username}!
+        <div className="card">
+          <div className="success-message" style={{ marginBottom: '20px' }}>
+            Solved by {statement.solver?.username} on {new Date(statement.solved_at!).toLocaleDateString()}
+          </div>
+          <h3 style={{ marginBottom: '10px' }}>Proof</h3>
+          <CodeEditor
+            value={statement.proof_code || ''}
+            onChange={() => {}}
+            readOnly
+            height="200px"
+          />
         </div>
       ) : isOwnStatement ? (
         <div className="card">
@@ -123,9 +140,11 @@ export default function StatementDetail() {
               <CodeEditor
                 value={proofCode}
                 onChange={setProofCode}
-                placeholder="-- Enter your proof here
--- Your code will be combined with the statement above
--- The proof must compile without 'sorry'"
+                placeholder="-- Enter a proof term for the proposition above
+-- Examples:
+-- fun n => Nat.add_zero n
+-- Nat.add_comm
+-- by simp [Nat.add_comm]"
               />
             </div>
 
@@ -139,8 +158,8 @@ export default function StatementDetail() {
           </form>
 
           <div style={{ marginTop: '20px', color: '#666' }}>
-            <strong>Note:</strong> Your proof code will be appended to the statement code.
-            It must compile successfully and cannot contain <code>sorry</code>.
+            <strong>Note:</strong> Submit a proof term whose type exactly matches the proposition.
+            You can use tactic proofs with <code>by ...</code>. Cannot contain <code>sorry</code>.
           </div>
         </div>
       ) : (

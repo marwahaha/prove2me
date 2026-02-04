@@ -21,11 +21,13 @@ def add_current_prize(statement: Statement, db: Session) -> dict:
     return {
         "id": statement.id,
         "title": statement.title,
+        "definitions": statement.definitions,
         "lean_code": statement.lean_code,
         "submitter": statement.submitter,
         "is_solved": statement.is_solved,
         "solved_at": statement.solved_at,
         "solver": statement.solver,
+        "proof_code": statement.proof_code,
         "created_at": statement.created_at,
         "current_prize": prize,
     }
@@ -41,7 +43,9 @@ def add_current_prize_list_item(statement: Statement, db: Session) -> dict:
         "title": statement.title,
         "submitter": statement.submitter,
         "is_solved": statement.is_solved,
+        "solver": statement.solver,
         "created_at": statement.created_at,
+        "solved_at": statement.solved_at,
         "current_prize": prize,
     }
 
@@ -51,7 +55,7 @@ def list_statements(
     sort_by: Optional[str] = Query("newest", regex="^(newest|prize)$"),
     db: Session = Depends(get_db)
 ):
-    """List all unproven statements."""
+    """List all unsolved statements."""
     query = db.query(Statement).filter(Statement.is_solved == False)
 
     if sort_by == "newest":
@@ -69,6 +73,18 @@ def list_statements(
     return result
 
 
+@router.get("/all-solved", response_model=List[StatementListItem])
+def list_solved_statements(
+    db: Session = Depends(get_db)
+):
+    """List all solved statements."""
+    statements = db.query(Statement).filter(
+        Statement.is_solved == True
+    ).order_by(desc(Statement.solved_at)).all()
+
+    return [add_current_prize_list_item(s, db) for s in statements]
+
+
 @router.get("/my", response_model=List[StatementListItem])
 def list_my_statements(
     current_user: User = Depends(get_current_approved_user),
@@ -78,6 +94,19 @@ def list_my_statements(
     statements = db.query(Statement).filter(
         Statement.submitter_id == current_user.id
     ).order_by(desc(Statement.created_at)).all()
+
+    return [add_current_prize_list_item(s, db) for s in statements]
+
+
+@router.get("/solved", response_model=List[StatementListItem])
+def list_solved_by_me(
+    current_user: User = Depends(get_current_approved_user),
+    db: Session = Depends(get_db)
+):
+    """List statements the current user has solved (submitted proofs for)."""
+    statements = db.query(Statement).filter(
+        Statement.solver_id == current_user.id
+    ).order_by(desc(Statement.solved_at)).all()
 
     return [add_current_prize_list_item(s, db) for s in statements]
 
@@ -106,8 +135,8 @@ def create_statement(
     db: Session = Depends(get_db)
 ):
     """Submit a new Lean statement."""
-    # Compile the statement (allows sorry)
-    success, error = compile_statement(statement_data.lean_code)
+    # Compile the statement with definitions
+    success, error = compile_statement(statement_data.lean_code, statement_data.definitions)
 
     if not success:
         raise HTTPException(
@@ -118,6 +147,7 @@ def create_statement(
     # Create statement
     statement = Statement(
         title=statement_data.title,
+        definitions=statement_data.definitions,
         lean_code=statement_data.lean_code,
         submitter_id=current_user.id,
     )
@@ -134,7 +164,7 @@ def compile_code(
     current_user: User = Depends(get_current_approved_user),
 ):
     """Compile Lean code without saving (for testing)."""
-    success, error = compile_statement(statement_data.lean_code)
+    success, error = compile_statement(statement_data.lean_code, statement_data.definitions)
 
     return CompileResult(
         success=success,

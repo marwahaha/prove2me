@@ -25,7 +25,8 @@ export default function Header() {
         <nav className="nav">
           {user ? (
             <>
-              <Link to="/">Statements</Link>
+              <Link to="/">Open</Link>
+              <Link to="/solved">Solved</Link>
               <Link to="/submit">Submit</Link>
               <Link to="/leaderboard">Leaderboard</Link>
               <Link to="/profile">Profile</Link>

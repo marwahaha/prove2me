@@ -19,11 +19,13 @@ export interface UserPublic {
 export interface Statement {
   id: string;
   title: string;
+  definitions: string | null;
   lean_code: string;
   submitter: UserPublic;
   is_solved: boolean;
   solved_at: string | null;
   solver: UserPublic | null;
+  proof_code: string | null;
   created_at: string;
   current_prize: number | null;
 }
@@ -33,7 +35,9 @@ export interface StatementListItem {
   title: string;
   submitter: UserPublic;
   is_solved: boolean;
+  solver: UserPublic | null;
   created_at: string;
+  solved_at: string | null;
   current_prize: number | null;
 }
 
@@ -113,20 +117,24 @@ export const statementsApi = {
   list: (sortBy: 'newest' | 'prize' = 'newest') =>
     request<StatementListItem[]>(`/statements?sort_by=${sortBy}`),
 
+  listSolved: () => request<StatementListItem[]>('/statements/all-solved'),
+
   get: (id: string) => request<Statement>(`/statements/${id}`),
 
-  create: (title: string, lean_code: string) =>
+  create: (title: string, lean_code: string, definitions?: string) =>
     request<Statement>('/statements', {
       method: 'POST',
-      body: JSON.stringify({ title, lean_code }),
+      body: JSON.stringify({ title, lean_code, definitions }),
     }),
 
   my: () => request<StatementListItem[]>('/statements/my'),
 
-  compile: (title: string, lean_code: string) =>
+  solvedByMe: () => request<StatementListItem[]>('/statements/solved'),
+
+  compile: (title: string, lean_code: string, definitions?: string) =>
     request<CompileResult>('/statements/compile', {
       method: 'POST',
-      body: JSON.stringify({ title, lean_code }),
+      body: JSON.stringify({ title, lean_code, definitions }),
     }),
 };
 

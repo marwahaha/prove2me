@@ -1,6 +1,7 @@
 import subprocess
 import tempfile
 import os
+import re
 import logging
 from .config import get_settings
 
@@ -122,6 +123,10 @@ def compile_proof(statement_code: str, proof_code: str, theorem_name: str, defin
     # Check for sorry in the proof
     if "sorry" in proof_code:
         return False, "Proof cannot contain 'sorry'"
+
+    # Check for axiom declarations - users could cheat by declaring arbitrary axioms
+    if re.search(r'\baxiom\b', proof_code):
+        return False, "Proof cannot contain axiom declarations"
 
     # Build the code with optional definitions from the statement
     definitions_block = definitions.strip() + "\n\n" if definitions and definitions.strip() else ""

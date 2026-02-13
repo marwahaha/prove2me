@@ -22,23 +22,19 @@ export default function StatementCard({ statement }: StatementCardProps) {
 
   return (
     <div
-      className="card statement-card"
+      className="statement-row"
       onClick={() => navigate(`/statement/${statement.id}`)}
     >
-      <div className="card-header">
-        <h3 className="card-title">{statement.title}</h3>
-        {statement.current_prize && (
-          <span className={`prize-badge ${statement.is_solved ? 'solved' : ''}`}>
-            {statement.is_solved ? 'Solved' : `${statement.current_prize} pts`}
-          </span>
-        )}
-      </div>
-      <div className="statement-meta">
-        <span>submitted by {statement.submitter.username} {formatTimeAgo(statement.created_at)}</span>
-        {statement.is_solved && statement.solver && statement.solved_at && (
-          <span>solved by {statement.solver.username} {formatTimeAgo(statement.solved_at)}</span>
-        )}
-      </div>
+      <span className="statement-row-title">{statement.title}</span>
+      <span className="statement-row-meta">
+        {statement.submitter.username}
+        <span className="statement-row-time">{formatTimeAgo(statement.created_at)}</span>
+      </span>
+      {statement.is_solved && statement.solver ? (
+        <span className="prize-badge solved">Solved</span>
+      ) : statement.current_prize ? (
+        <span className="prize-badge">{statement.current_prize} pts</span>
+      ) : null}
     </div>
   );
 }

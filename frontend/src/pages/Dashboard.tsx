@@ -48,9 +48,11 @@ export default function Dashboard() {
           <p>No open statements yet. Be the first to submit one!</p>
         </div>
       ) : (
-        statements.map((statement) => (
-          <StatementCard key={statement.id} statement={statement} />
-        ))
+        <div className="statement-list">
+          {statements.map((statement) => (
+            <StatementCard key={statement.id} statement={statement} />
+          ))}
+        </div>
       )}
     </div>
   );

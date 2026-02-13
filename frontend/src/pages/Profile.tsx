@@ -81,9 +81,11 @@ export default function Profile() {
               {myOpenStatements.length > 0 && (
                 <>
                   <h3 style={{ marginBottom: '15px', color: '#666' }}>Open (awaiting proof)</h3>
-                  {myOpenStatements.map((statement) => (
-                    <StatementCard key={statement.id} statement={statement} />
-                  ))}
+                  <div className="statement-list">
+                    {myOpenStatements.map((statement) => (
+                      <StatementCard key={statement.id} statement={statement} />
+                    ))}
+                  </div>
                 </>
               )}
 
@@ -92,9 +94,11 @@ export default function Profile() {
                   <h3 style={{ marginTop: '30px', marginBottom: '15px', color: '#666' }}>
                     Solved (by others)
                   </h3>
-                  {myStatementsGotSolved.map((statement) => (
-                    <StatementCard key={statement.id} statement={statement} />
-                  ))}
+                  <div className="statement-list">
+                    {myStatementsGotSolved.map((statement) => (
+                      <StatementCard key={statement.id} statement={statement} />
+                    ))}
+                  </div>
                 </>
               )}
             </>
@@ -107,9 +111,11 @@ export default function Profile() {
               <p>You haven't solved any statements yet.</p>
             </div>
           ) : (
-            solvedByMe.map((statement) => (
-              <StatementCard key={statement.id} statement={statement} />
-            ))
+            <div className="statement-list">
+              {solvedByMe.map((statement) => (
+                <StatementCard key={statement.id} statement={statement} />
+              ))}
+            </div>
           )}
         </>
       )}

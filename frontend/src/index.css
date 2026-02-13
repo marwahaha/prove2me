@@ -204,29 +204,64 @@ a:hover {
   font-weight: 600;
 }
 
-/* Statement cards */
-.statement-card {
-  cursor: pointer;
-  transition: box-shadow 0.2s;
+/* Statement rows (compact list) */
+.statement-list {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow: hidden;
 }
 
-.statement-card:hover {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-
-.statement-meta {
+.statement-row {
   display: flex;
-  gap: 20px;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.15s;
+}
+
+.statement-row:last-child {
+  border-bottom: none;
+}
+
+.statement-row:hover {
+  background-color: #f8f9fa;
+}
+
+.statement-row-title {
+  flex: 1;
+  font-weight: 500;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.statement-row-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   color: #666;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.statement-row-time {
+  color: #999;
 }
 
 .prize-badge {
   background: #ff9800;
   color: white;
-  padding: 4px 10px;
+  padding: 2px 10px;
   border-radius: 12px;
   font-weight: 600;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  min-width: 60px;
+  text-align: center;
 }
 
 .prize-badge.solved {
@@ -388,8 +423,13 @@ a:hover {
     align-items: flex-start;
   }
 
-  .statement-meta {
-    flex-direction: column;
-    gap: 5px;
+  .statement-row {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .statement-row-title {
+    flex-basis: 100%;
+    white-space: normal;
   }
 }

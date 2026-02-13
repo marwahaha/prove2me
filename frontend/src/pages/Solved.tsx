@@ -35,9 +35,11 @@ export default function Solved() {
           <p>No statements have been solved yet.</p>
         </div>
       ) : (
-        statements.map((statement) => (
-          <StatementCard key={statement.id} statement={statement} />
-        ))
+        <div className="statement-list">
+          {statements.map((statement) => (
+            <StatementCard key={statement.id} statement={statement} />
+          ))}
+        </div>
       )}
     </div>
   );

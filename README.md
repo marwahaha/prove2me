@@ -119,6 +119,30 @@ npm run dev
 
 The backend will be available at http://localhost:8000 and the frontend at http://localhost:5173.
 
+## Deploying to Server
+
+```bash
+# Stop the service
+sudo systemctl stop prove2me
+
+# Update the code
+cd /opt/prove2me
+git pull
+
+# Rebuild frontend and copy to web root
+cd frontend
+npm run build
+sudo cp -r dist/* /var/www/prove2me/
+
+# Run database migrations
+cd ../backend
+source venv/bin/activate
+alembic upgrade head
+
+# Start the service
+sudo systemctl start prove2me
+```
+
 ## Default Admin Credentials
 
 - Username: `admin`

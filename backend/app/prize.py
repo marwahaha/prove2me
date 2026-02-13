@@ -8,6 +8,7 @@ DEFAULT_SETTINGS = {
     "base_points": 100,
     "growth_rate": 1.50,
     "submitter_share": 0.20,
+    "max_statements_per_day": 3,
 }
 
 

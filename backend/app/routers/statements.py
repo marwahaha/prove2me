@@ -11,8 +11,6 @@ from ..auth import get_current_approved_user
 from ..lean_runner import compile_statement
 from ..prize import get_prize_settings, calculate_prize
 
-MAX_STATEMENTS_PER_DAY = 3
-
 router = APIRouter(prefix="/api/statements", tags=["statements"])
 
 
@@ -142,16 +140,18 @@ def create_statement(
     """Submit a new Lean statement."""
     # Rate limit for non-admin users
     if not current_user.is_admin:
+        settings = get_prize_settings(db)
+        max_per_day = settings["max_statements_per_day"]
         one_day_ago = datetime.utcnow() - timedelta(days=1)
         recent_count = db.query(Statement).filter(
             Statement.submitter_id == current_user.id,
             Statement.created_at >= one_day_ago
         ).count()
 
-        if recent_count >= MAX_STATEMENTS_PER_DAY:
+        if recent_count >= max_per_day:
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail=f"You can only submit {MAX_STATEMENTS_PER_DAY} statements per 24 hours"
+                detail=f"You can only submit {max_per_day} statements per 24 hours"
             )
 
     # Compile the statement with definitions

@@ -150,6 +150,14 @@ def update_settings(
             )
         set_prize_setting(db, "submitter_share", settings_data.submitter_share)
 
+    if settings_data.max_statements_per_day is not None:
+        if settings_data.max_statements_per_day < 1:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="max_statements_per_day must be at least 1"
+            )
+        set_prize_setting(db, "max_statements_per_day", settings_data.max_statements_per_day)
+
     settings = get_prize_settings(db)
     return SettingsResponse(**settings)
 

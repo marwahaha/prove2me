@@ -64,6 +64,7 @@ export interface PrizeSettings {
   base_points: number;
   growth_rate: number;
   submitter_share: number;
+  max_statements_per_day: number;
 }
 
 class ApiError extends Error {

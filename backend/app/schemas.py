@@ -107,12 +107,14 @@ class SettingsResponse(BaseModel):
     base_points: int
     growth_rate: float
     submitter_share: float
+    max_statements_per_day: int
 
 
 class SettingsUpdate(BaseModel):
     base_points: Optional[int] = None
     growth_rate: Optional[float] = None
     submitter_share: Optional[float] = None
+    max_statements_per_day: Optional[int] = None
 
 
 # Compile result

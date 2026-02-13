@@ -14,6 +14,7 @@ export default function Admin() {
   const [basePoints, setBasePoints] = useState('');
   const [growthRate, setGrowthRate] = useState('');
   const [submitterShare, setSubmitterShare] = useState('');
+  const [maxStatementsPerDay, setMaxStatementsPerDay] = useState('');
   const [savingSettings, setSavingSettings] = useState(false);
 
   useEffect(() => {
@@ -37,6 +38,7 @@ export default function Admin() {
       setBasePoints(settingsData.base_points.toString());
       setGrowthRate(settingsData.growth_rate.toString());
       setSubmitterShare((settingsData.submitter_share * 100).toString());
+      setMaxStatementsPerDay(settingsData.max_statements_per_day.toString());
     } catch (error: any) {
       toast.error('Failed to load admin data');
     } finally {
@@ -93,6 +95,7 @@ export default function Admin() {
         base_points: parseInt(basePoints),
         growth_rate: parseFloat(growthRate),
         submitter_share: parseFloat(submitterShare) / 100,
+        max_statements_per_day: parseInt(maxStatementsPerDay),
       });
       setSettings(updatedSettings);
       toast.success('Settings saved');
@@ -267,6 +270,18 @@ export default function Admin() {
                   />
                   <small style={{ color: '#666' }}>Percentage of prize to statement submitter</small>
                 </div>
+
+                <div className="form-group">
+                  <label htmlFor="maxStatementsPerDay">Max Statements Per Day</label>
+                  <input
+                    type="number"
+                    id="maxStatementsPerDay"
+                    value={maxStatementsPerDay}
+                    onChange={(e) => setMaxStatementsPerDay(e.target.value)}
+                    min="1"
+                  />
+                  <small style={{ color: '#666' }}>Maximum statements a user can submit per 24 hours</small>
+                </div>
               </div>
 
               <button
@@ -287,6 +302,7 @@ export default function Admin() {
                   <li>Growth Rate: {settings.growth_rate}x per day</li>
                   <li>Submitter Share: {(settings.submitter_share * 100).toFixed(0)}%</li>
                   <li>Prover Share: {((1 - settings.submitter_share) * 100).toFixed(0)}%</li>
+                  <li>Max Statements Per Day: {settings.max_statements_per_day}</li>
                 </ul>
               </div>
             )}

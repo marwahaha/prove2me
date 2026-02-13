@@ -55,6 +55,7 @@ class StatementResponse(BaseModel):
     solved_at: Optional[datetime]
     solver: Optional[UserPublic]
     proof_code: Optional[str] = None
+    proof_imports: Optional[str] = None
     proof_theorem_name: Optional[str] = None
     created_at: datetime
     current_prize: Optional[int] = None
@@ -81,6 +82,7 @@ class StatementListItem(BaseModel):
 class ProofSubmit(BaseModel):
     lean_code: str
     theorem_name: str
+    imports: Optional[str] = None
 
 
 class ProofResult(BaseModel):

@@ -42,6 +42,7 @@ class Statement(Base):
     solved_at = Column(DateTime, nullable=True)
     solver_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     proof_code = Column(Text, nullable=True)
+    proof_imports = Column(Text, nullable=True)
     proof_theorem_name = Column(String(200), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 

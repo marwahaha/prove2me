@@ -48,7 +48,8 @@ def submit_proof(
         statement.lean_code,
         proof_data.lean_code,
         proof_data.theorem_name,
-        statement.definitions
+        statement.definitions,
+        proof_data.imports
     )
 
     if not success:
@@ -67,6 +68,7 @@ def submit_proof(
     statement.solved_at = datetime.utcnow()
     statement.solver_id = current_user.id
     statement.proof_code = proof_data.lean_code
+    statement.proof_imports = proof_data.imports
     statement.proof_theorem_name = proof_data.theorem_name
 
     # Award points

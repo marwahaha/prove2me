@@ -10,6 +10,7 @@ export default function StatementDetail() {
   const { user, refreshUser } = useAuth();
   const [statement, setStatement] = useState<Statement | null>(null);
   const [loading, setLoading] = useState(true);
+  const [imports, setImports] = useState('');
   const [proofCode, setProofCode] = useState('');
   const [theoremName, setTheoremName] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -49,7 +50,7 @@ export default function StatementDetail() {
     setProofResult(null);
 
     try {
-      const result = await proofsApi.submit(id, proofCode, theoremName.trim());
+      const result = await proofsApi.submit(id, proofCode, theoremName.trim(), imports || undefined);
       setProofResult(result);
 
       if (result.success) {
@@ -123,6 +124,18 @@ export default function StatementDetail() {
               Theorem: <code>{statement.proof_theorem_name}</code>
             </p>
           )}
+          {statement.proof_imports && (
+            <>
+              <h4 style={{ marginBottom: '5px' }}>Imports</h4>
+              <CodeEditor
+                value={statement.proof_imports}
+                onChange={() => {}}
+                readOnly
+                height="100px"
+              />
+              <div style={{ marginTop: '10px' }} />
+            </>
+          )}
           <CodeEditor
             value={statement.proof_code || ''}
             onChange={() => {}}
@@ -145,6 +158,18 @@ export default function StatementDetail() {
           )}
 
           <form onSubmit={handleSubmitProof}>
+            <div className="form-group">
+              <label>Imports</label>
+              <CodeEditor
+                value={imports}
+                onChange={setImports}
+                placeholder="-- Optional: add import statements here
+-- e.g., import Mathlib.Data.Nat.Basic
+-- Note: 'import Mathlib' is always included automatically"
+                height="100px"
+              />
+            </div>
+
             <div className="form-group">
               <label>Lean Code</label>
               <CodeEditor

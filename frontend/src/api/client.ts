@@ -26,6 +26,7 @@ export interface Statement {
   solved_at: string | null;
   solver: UserPublic | null;
   proof_code: string | null;
+  proof_imports: string | null;
   proof_theorem_name: string | null;
   created_at: string;
   current_prize: number | null;
@@ -141,10 +142,10 @@ export const statementsApi = {
 
 // Proofs API
 export const proofsApi = {
-  submit: (statementId: string, lean_code: string, theorem_name: string) =>
+  submit: (statementId: string, lean_code: string, theorem_name: string, imports?: string) =>
     request<ProofResult>(`/proofs/${statementId}`, {
       method: 'POST',
-      body: JSON.stringify({ lean_code, theorem_name }),
+      body: JSON.stringify({ lean_code, theorem_name, imports }),
     }),
 };
 

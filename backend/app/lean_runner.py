@@ -111,35 +111,41 @@ def compile_statement(statement_code: str, definitions: str = None) -> tuple[boo
     return True, ""
 
 
-def compile_proof(statement_code: str, proof_code: str, theorem_name: str, definitions: str = None) -> tuple[bool, str]:
+def compile_proof(statement_code: str, proof_code: str, theorem_name: str, definitions: str = None, imports: str = None) -> tuple[bool, str]:
     """
     Validate a proof:
     1. Must be valid Lean syntax
     2. Must not contain 'sorry'
-    3. The specified theorem must have type exactly matching the statement
+    3. Must not contain axiom declarations
+    4. The specified theorem must have type exactly matching the statement
 
     The user submits full Lean code and specifies which theorem proves the statement.
+    Compilation order: imports → definitions → proposition → proof code.
     """
-    # Check for sorry in the proof
+    # Check for sorry in both imports and proof code
     if "sorry" in proof_code:
         return False, "Proof cannot contain 'sorry'"
+    if imports and "sorry" in imports:
+        return False, "Imports cannot contain 'sorry'"
 
     # Check for axiom declarations - users could cheat by declaring arbitrary axioms
     if re.search(r'\baxiom\b', proof_code):
         return False, "Proof cannot contain axiom declarations"
+    if imports and re.search(r'\baxiom\b', imports):
+        return False, "Imports cannot contain axiom declarations"
 
-    # Build the code with optional definitions from the statement
+    # Build the code with optional imports and definitions
+    imports_block = imports.strip() + "\n\n" if imports and imports.strip() else ""
     definitions_block = definitions.strip() + "\n\n" if definitions and definitions.strip() else ""
 
-    # First, compile the user's proof code to make sure it compiles
-    # Then check that the theorem has the correct type
+    # Compilation order: imports → definitions → proposition → proof code
     wrapped_code = f"""import Mathlib
 
-{definitions_block}-- User's proof code
-{proof_code}
-
--- The statement (proposition to prove)
+{imports_block}{definitions_block}-- The statement (proposition to prove)
 def _statement : Prop := {statement_code}
+
+-- User's proof code
+{proof_code}
 
 -- Verify the theorem has exactly the type of the statement
 #check ({theorem_name} : _statement)

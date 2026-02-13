@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { adminApi, User, PrizeSettings, StatementListItem } from '../api/client';
+import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
 export default function Admin() {
+  const { user: currentUser } = useAuth();
   const [pendingUsers, setPendingUsers] = useState<User[]>([]);
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [settings, setSettings] = useState<PrizeSettings | null>(null);
@@ -83,6 +85,21 @@ export default function Admin() {
       toast.success(`Password reset for ${username}`);
     } catch (error: any) {
       toast.error(error.message || 'Failed to reset password');
+    }
+  };
+
+  const handleToggleAdmin = async (userId: string, username: string, isCurrentlyAdmin: boolean) => {
+    const message = isCurrentlyAdmin
+      ? `Are you sure you want to remove admin powers from ${username}?`
+      : `Are you sure you want to give admin powers to ${username}?`;
+    if (!confirm(message)) return;
+
+    try {
+      await adminApi.toggleAdmin(userId);
+      toast.success(isCurrentlyAdmin ? 'Admin status removed' : 'User is now an admin');
+      loadData();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to toggle admin status');
     }
   };
 
@@ -218,6 +235,15 @@ export default function Admin() {
                       >
                         Reset Password
                       </button>
+                      {currentUser && currentUser.id !== user.id && (
+                        <button
+                          className={`btn ${user.is_admin ? 'btn-danger' : 'btn-success'} btn-small`}
+                          onClick={() => handleToggleAdmin(user.id, user.username, user.is_admin)}
+                          style={{ marginLeft: '10px' }}
+                        >
+                          {user.is_admin ? 'Remove Admin' : 'Make Admin'}
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}

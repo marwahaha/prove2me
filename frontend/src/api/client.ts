@@ -184,6 +184,9 @@ export const adminApi = {
   getAllStatements: () => request<StatementListItem[]>('/admin/all-statements'),
 
   getAllUsers: () => request<User[]>('/admin/users'),
+
+  toggleAdmin: (userId: string) =>
+    request<User>(`/admin/toggle-admin/${userId}`, { method: 'POST' }),
 };
 
 export { ApiError };

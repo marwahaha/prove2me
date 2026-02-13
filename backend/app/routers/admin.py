@@ -196,3 +196,31 @@ def get_all_users(
     """Get all users."""
     users = db.query(User).order_by(desc(User.created_at)).all()
     return users
+
+
+@router.post("/toggle-admin/{user_id}", response_model=UserResponse)
+def toggle_admin(
+    user_id: UUID,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Toggle admin status for a user."""
+    if str(current_user.id) == str(user_id):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot change your own admin status"
+        )
+
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+
+    user.is_admin = not user.is_admin
+    db.commit()
+    db.refresh(user)
+
+    return user

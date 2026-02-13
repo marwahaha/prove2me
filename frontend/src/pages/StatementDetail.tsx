@@ -131,7 +131,7 @@ export default function StatementDetail() {
                 value={statement.proof_imports}
                 onChange={() => {}}
                 readOnly
-                height="100px"
+                height="60px"
               />
               <div style={{ marginTop: '10px' }} />
             </>
@@ -163,10 +163,8 @@ export default function StatementDetail() {
               <CodeEditor
                 value={imports}
                 onChange={setImports}
-                placeholder="-- Optional: add import statements here
--- e.g., import Mathlib.Data.Nat.Basic
--- Note: 'import Mathlib' is always included automatically"
-                height="100px"
+                placeholder="-- Optional: e.g., import Mathlib.Data.Nat.Basic"
+                height="60px"
               />
             </div>
 

@@ -31,6 +31,7 @@ def add_current_prize(statement: Statement, db: Session) -> dict:
         "solved_at": statement.solved_at,
         "solver": statement.solver,
         "proof_code": statement.proof_code,
+        "proof_imports": statement.proof_imports,
         "proof_theorem_name": statement.proof_theorem_name,
         "created_at": statement.created_at,
         "current_prize": prize,

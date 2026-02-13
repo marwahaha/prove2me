@@ -24,16 +24,26 @@ def run_lean(code: str) -> tuple[bool, str]:
         temp_path = f.name
 
     try:
-        logger.info(f"Running Lean: lake env lean {temp_path}")
+        # Determine lake command path
+        if settings.lean_bin_path:
+            lake_cmd = os.path.join(settings.lean_bin_path, 'lake')
+            env = os.environ.copy()
+            env['PATH'] = settings.lean_bin_path + ':' + env.get('PATH', '')
+        else:
+            lake_cmd = 'lake'
+            env = None
+
+        logger.info(f"Running Lean: {lake_cmd} env lean {temp_path}")
         logger.info(f"Code:\n{code[:500]}{'...' if len(code) > 500 else ''}")
 
         # Use Popen to stream output
         process = subprocess.Popen(
-            ['lake', 'env', 'lean', temp_path],
+            [lake_cmd, 'env', 'lean', temp_path],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-            cwd=settings.lean_project_path
+            cwd=settings.lean_project_path,
+            env=env
         )
 
         try:

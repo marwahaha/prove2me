@@ -99,6 +99,26 @@ npm run dev
 
 The frontend will be available at http://localhost:5173
 
+## Running
+
+### Backend
+
+```bash
+cd backend
+source venv/bin/activate
+alembic upgrade head
+uvicorn app.main:app --reload --port 8000
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm run dev
+```
+
+The backend will be available at http://localhost:8000 and the frontend at http://localhost:5173.
+
 ## Default Admin Credentials
 
 - Username: `admin`

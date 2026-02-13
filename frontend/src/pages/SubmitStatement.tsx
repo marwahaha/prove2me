@@ -140,6 +140,7 @@ export default function SubmitStatement() {
           <li>Mathlib is available — you can use any Mathlib types and definitions</li>
           <li>The prize increases over time until someone solves it</li>
           <li>You'll earn 20% of the prize when someone proves your statement</li>
+          <li><strong>Limit:</strong> You can submit up to 3 statements per 24 hours</li>
         </ul>
       </div>
     </div>

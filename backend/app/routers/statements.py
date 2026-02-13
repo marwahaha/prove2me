@@ -3,12 +3,15 @@ from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from typing import List, Optional
 from uuid import UUID
+from datetime import datetime, timedelta
 from ..database import get_db
 from ..models import User, Statement
 from ..schemas import StatementCreate, StatementResponse, StatementListItem, CompileResult
 from ..auth import get_current_approved_user
 from ..lean_runner import compile_statement
 from ..prize import get_prize_settings, calculate_prize
+
+MAX_STATEMENTS_PER_DAY = 3
 
 router = APIRouter(prefix="/api/statements", tags=["statements"])
 
@@ -136,6 +139,20 @@ def create_statement(
     db: Session = Depends(get_db)
 ):
     """Submit a new Lean statement."""
+    # Rate limit for non-admin users
+    if not current_user.is_admin:
+        one_day_ago = datetime.utcnow() - timedelta(days=1)
+        recent_count = db.query(Statement).filter(
+            Statement.submitter_id == current_user.id,
+            Statement.created_at >= one_day_ago
+        ).count()
+
+        if recent_count >= MAX_STATEMENTS_PER_DAY:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail=f"You can only submit {MAX_STATEMENTS_PER_DAY} statements per 24 hours"
+            )
+
     # Compile the statement with definitions
     success, error = compile_statement(statement_data.lean_code, statement_data.definitions)
 

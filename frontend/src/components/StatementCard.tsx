@@ -6,7 +6,8 @@ interface StatementCardProps {
 }
 
 function formatTimeAgo(dateString: string): string {
-  const date = new Date(dateString);
+  // Backend stores UTC but serializes without timezone suffix; ensure JS parses as UTC
+  const date = new Date(dateString.endsWith('Z') ? dateString : dateString + 'Z');
   const now = new Date();
   const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 

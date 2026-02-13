@@ -1,6 +1,8 @@
+import { useMemo } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { markdown } from '@codemirror/lang-markdown';
 import { githubLight } from '@uiw/codemirror-theme-github';
+import { leanUnicodeInput } from '../lib/leanUnicodeInput';
 
 interface CodeEditorProps {
   value: string;
@@ -17,13 +19,17 @@ export default function CodeEditor({
   readOnly = false,
   height = '300px',
 }: CodeEditorProps) {
+  const extensions = useMemo(
+    () => (readOnly ? [markdown()] : [markdown(), leanUnicodeInput()]),
+    [readOnly],
+  );
   return (
     <div className="code-editor">
       <CodeMirror
         value={value}
         height={height}
         theme={githubLight}
-        extensions={[markdown()]}
+        extensions={extensions}
         onChange={onChange}
         placeholder={placeholder}
         readOnly={readOnly}

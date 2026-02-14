@@ -8,20 +8,29 @@ export default function Dashboard() {
   const [statements, setStatements] = useState<StatementListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<'newest' | 'prize'>('newest');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   useEffect(() => {
     loadStatements();
-  }, [sortBy]);
+  }, [sortBy, selectedTags]);
 
   const loadStatements = async () => {
     try {
-      const data = await statementsApi.list(sortBy);
+      const data = await statementsApi.list(sortBy, selectedTags.length > 0 ? selectedTags : undefined);
       setStatements(data);
     } catch (error: any) {
       toast.error('Failed to load statements');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleTagClick = (tagName: string) => {
+    setSelectedTags((prev) =>
+      prev.some((t) => t.toLowerCase() === tagName.toLowerCase())
+        ? prev.filter((t) => t.toLowerCase() !== tagName.toLowerCase())
+        : [...prev, tagName]
+    );
   };
 
   return (
@@ -32,6 +41,18 @@ export default function Dashboard() {
           Submit Statement
         </Link>
       </div>
+
+      {selectedTags.length > 0 && (
+        <div className="tags-filter">
+          <span className="tags-filter-label">Filtering by:</span>
+          {selectedTags.map((tag) => (
+            <span key={tag} className="tag-pill tag-filter-pill" onClick={() => handleTagClick(tag)}>
+              {tag} <span className="tag-delete">&times;</span>
+            </span>
+          ))}
+          <span className="tag-pill tag-add" onClick={() => setSelectedTags([])}>Clear all</span>
+        </div>
+      )}
 
       <div className="sort-controls">
         <label>Sort by: </label>
@@ -50,7 +71,12 @@ export default function Dashboard() {
       ) : (
         <div className="statement-list">
           {statements.map((statement) => (
-            <StatementCard key={statement.id} statement={statement} />
+            <StatementCard
+              key={statement.id}
+              statement={statement}
+              onTagClick={handleTagClick}
+              onTagsChanged={loadStatements}
+            />
           ))}
         </div>
       )}

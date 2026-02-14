@@ -30,6 +30,7 @@ export interface Statement {
   proof_theorem_name: string | null;
   created_at: string;
   current_prize: number | null;
+  tags: string[];
 }
 
 export interface StatementListItem {
@@ -41,6 +42,7 @@ export interface StatementListItem {
   created_at: string;
   solved_at: string | null;
   current_prize: number | null;
+  tags: string[];
 }
 
 export interface LeaderboardEntry {
@@ -125,10 +127,18 @@ export const authApi = {
 
 // Statements API
 export const statementsApi = {
-  list: (sortBy: 'newest' | 'prize' = 'newest') =>
-    request<StatementListItem[]>(`/statements?sort_by=${sortBy}`),
+  list: (sortBy: 'newest' | 'prize' = 'newest', tags?: string[]) => {
+    const params = new URLSearchParams({ sort_by: sortBy });
+    if (tags && tags.length > 0) params.set('tags', tags.join(','));
+    return request<StatementListItem[]>(`/statements?${params.toString()}`);
+  },
 
-  listSolved: () => request<StatementListItem[]>('/statements/all-solved'),
+  listSolved: (tags?: string[]) => {
+    const params = new URLSearchParams();
+    if (tags && tags.length > 0) params.set('tags', tags.join(','));
+    const qs = params.toString();
+    return request<StatementListItem[]>(`/statements/all-solved${qs ? '?' + qs : ''}`);
+  },
 
   get: (id: string) => request<Statement>(`/statements/${id}`),
 
@@ -238,6 +248,23 @@ export const commentsApi = {
     request<{ message: string }>(`/comments/${commentId}`, {
       method: 'DELETE',
     }),
+};
+
+// Tags API
+export const tagsApi = {
+  create: (statementId: string, tagName: string) =>
+    request<{ tag_name: string }>(`/statements/${statementId}/tags`, {
+      method: 'POST',
+      body: JSON.stringify({ tag_name: tagName }),
+    }),
+
+  delete: (statementId: string, tagName: string) =>
+    request<{ message: string }>(`/statements/${statementId}/tags/${encodeURIComponent(tagName)}`, {
+      method: 'DELETE',
+    }),
+
+  autocomplete: (query: string) =>
+    request<string[]>(`/tags/autocomplete?q=${encodeURIComponent(query)}`),
 };
 
 export { ApiError };

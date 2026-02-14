@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { statementsApi, proofsApi, adminApi, Statement } from '../api/client';
+import { statementsApi, proofsApi, adminApi, tagsApi, Statement } from '../api/client';
 import { formatTimeAgo } from '../utils/time';
 import { useAuth } from '../contexts/AuthContext';
 import CodeEditor from '../components/CodeEditor';
 import CommentSection from '../components/CommentSection';
+import TagInput from '../components/TagInput';
 import toast from 'react-hot-toast';
 
 export default function StatementDetail() {
@@ -20,6 +21,7 @@ export default function StatementDetail() {
   const [proofResult, setProofResult] = useState<{ success: boolean; message: string } | null>(null);
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState('');
+  const [showTagInput, setShowTagInput] = useState(false);
 
   useEffect(() => {
     loadStatement();
@@ -109,6 +111,27 @@ export default function StatementDetail() {
     }
   };
 
+  const handleAddTag = async (tagName: string) => {
+    if (!statement) return;
+    try {
+      await tagsApi.create(statement.id, tagName);
+      setShowTagInput(false);
+      await loadStatement();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to add tag');
+    }
+  };
+
+  const handleDeleteTag = async (tagName: string) => {
+    if (!statement) return;
+    try {
+      await tagsApi.delete(statement.id, tagName);
+      await loadStatement();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to delete tag');
+    }
+  };
+
   const isOwnStatement = user && statement.submitter.id === user.id;
 
   return (
@@ -157,6 +180,23 @@ export default function StatementDetail() {
               <span>·</span>
               <span>Solved by {statement.solver.username} ({formatTimeAgo(statement.solved_at!)})</span>
             </>
+          )}
+        </div>
+
+        <div className="statement-detail-tags" style={{ marginBottom: '20px', display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+          {statement.tags?.map((tag) => (
+            <span key={tag} className="tag-pill">
+              {tag}
+              {user?.is_admin && (
+                <span className="tag-delete" onClick={() => handleDeleteTag(tag)}>&times;</span>
+              )}
+            </span>
+          ))}
+          {user && !showTagInput && (
+            <span className="tag-pill tag-add" onClick={() => setShowTagInput(true)}>+ Add Tag</span>
+          )}
+          {showTagInput && (
+            <TagInput onSubmit={handleAddTag} onCancel={() => setShowTagInput(false)} />
           )}
         </div>
 

@@ -1,17 +1,24 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from sqlalchemy.orm import Session
-from sqlalchemy import desc
+from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import desc, func
 from typing import List, Optional
 from uuid import UUID
 from datetime import datetime, timedelta
 from ..database import get_db
-from ..models import User, Statement
+from ..models import User, Statement, Tag
 from ..schemas import StatementCreate, StatementResponse, StatementListItem, CompileResult
 from ..auth import get_current_approved_user
 from ..lean_runner import compile_statement
 from ..prize import get_prize_settings, calculate_prize
 
 router = APIRouter(prefix="/api/statements", tags=["statements"])
+
+
+def _build_tags(statement: Statement) -> list[str]:
+    """Return sorted list of tag names."""
+    tags = [tag.tag_name for tag in getattr(statement, 'tags', []) or []]
+    tags.sort(key=str.lower)
+    return tags
 
 
 def add_current_prize(statement: Statement, db: Session) -> dict:
@@ -33,6 +40,7 @@ def add_current_prize(statement: Statement, db: Session) -> dict:
         "proof_theorem_name": statement.proof_theorem_name,
         "created_at": statement.created_at,
         "current_prize": prize,
+        "tags": _build_tags(statement),
     }
 
 
@@ -50,16 +58,27 @@ def add_current_prize_list_item(statement: Statement, db: Session) -> dict:
         "created_at": statement.created_at,
         "solved_at": statement.solved_at,
         "current_prize": prize,
+        "tags": _build_tags(statement),
     }
 
 
 @router.get("", response_model=List[StatementListItem])
 def list_statements(
     sort_by: Optional[str] = Query("newest", regex="^(newest|prize)$"),
+    tags: Optional[str] = Query(None),
     db: Session = Depends(get_db)
 ):
     """List all unsolved statements."""
-    query = db.query(Statement).filter(Statement.is_solved == False, Statement.is_archived == False)
+    query = db.query(Statement).options(
+        joinedload(Statement.tags).joinedload(Tag.tagger)
+    ).filter(Statement.is_solved == False, Statement.is_archived == False)
+
+    if tags:
+        tag_list = [t.strip().lower() for t in tags.split(",") if t.strip()]
+        if tag_list:
+            query = query.filter(
+                Statement.tags.any(func.lower(Tag.tag_name).in_(tag_list))
+            )
 
     if sort_by == "newest":
         query = query.order_by(desc(Statement.created_at))
@@ -78,12 +97,24 @@ def list_statements(
 
 @router.get("/all-solved", response_model=List[StatementListItem])
 def list_solved_statements(
+    tags: Optional[str] = Query(None),
     db: Session = Depends(get_db)
 ):
     """List all solved statements."""
-    statements = db.query(Statement).filter(
+    query = db.query(Statement).options(
+        joinedload(Statement.tags).joinedload(Tag.tagger)
+    ).filter(
         Statement.is_solved == True, Statement.is_archived == False
-    ).order_by(desc(Statement.solved_at)).all()
+    )
+
+    if tags:
+        tag_list = [t.strip().lower() for t in tags.split(",") if t.strip()]
+        if tag_list:
+            query = query.filter(
+                Statement.tags.any(func.lower(Tag.tag_name).in_(tag_list))
+            )
+
+    statements = query.order_by(desc(Statement.solved_at)).all()
 
     return [add_current_prize_list_item(s, db) for s in statements]
 
@@ -94,7 +125,9 @@ def list_my_statements(
     db: Session = Depends(get_db)
 ):
     """List current user's submitted statements."""
-    statements = db.query(Statement).filter(
+    statements = db.query(Statement).options(
+        joinedload(Statement.tags).joinedload(Tag.tagger)
+    ).filter(
         Statement.submitter_id == current_user.id,
         Statement.is_archived == False,
     ).order_by(desc(Statement.created_at)).all()
@@ -108,7 +141,9 @@ def list_solved_by_me(
     db: Session = Depends(get_db)
 ):
     """List statements the current user has solved (submitted proofs for)."""
-    statements = db.query(Statement).filter(
+    statements = db.query(Statement).options(
+        joinedload(Statement.tags).joinedload(Tag.tagger)
+    ).filter(
         Statement.solver_id == current_user.id
     ).order_by(desc(Statement.solved_at)).all()
 
@@ -121,7 +156,9 @@ def get_statement(
     db: Session = Depends(get_db)
 ):
     """Get a specific statement by ID."""
-    statement = db.query(Statement).filter(Statement.id == statement_id).first()
+    statement = db.query(Statement).options(
+        joinedload(Statement.tags).joinedload(Tag.tagger)
+    ).filter(Statement.id == statement_id).first()
 
     if not statement or statement.is_archived:
         raise HTTPException(

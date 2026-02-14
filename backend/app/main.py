@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine, Base
-from .routers import auth, statements, proofs, leaderboard, admin, comments
+from .routers import auth, statements, proofs, leaderboard, admin, comments, tags
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -28,6 +28,7 @@ app.include_router(proofs.router)
 app.include_router(leaderboard.router)
 app.include_router(admin.router)
 app.include_router(comments.router)
+app.include_router(tags.router)
 
 
 @app.get("/")

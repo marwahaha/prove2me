@@ -38,6 +38,22 @@ class UserPublic(BaseModel):
         from_attributes = True
 
 
+# Tag schemas
+class TagCreate(BaseModel):
+    tag_name: str
+
+
+class TagResponse(BaseModel):
+    id: UUID
+    tag_name: str
+    tagger: UserPublic
+    created_at: datetime
+    is_privileged: bool = False
+
+    class Config:
+        from_attributes = True
+
+
 # Statement schemas
 class StatementCreate(BaseModel):
     title: str
@@ -59,6 +75,7 @@ class StatementResponse(BaseModel):
     proof_theorem_name: Optional[str] = None
     created_at: datetime
     current_prize: Optional[int] = None
+    tags: list[str] = []
 
     class Config:
         from_attributes = True
@@ -73,6 +90,7 @@ class StatementListItem(BaseModel):
     created_at: datetime
     solved_at: Optional[datetime] = None
     current_prize: Optional[int] = None
+    tags: list[str] = []
 
     class Config:
         from_attributes = True

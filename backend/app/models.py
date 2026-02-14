@@ -59,6 +59,20 @@ class Statement(Base):
         foreign_keys=[solver_id]
     )
     comments = relationship("Comment", back_populates="statement")
+    tags = relationship("Tag", back_populates="statement")
+
+
+class Tag(Base):
+    __tablename__ = "tags"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    statement_id = Column(UUID(as_uuid=True), ForeignKey("statements.id"), nullable=False)
+    tag_name = Column(String(30), nullable=False)
+    tagger_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    statement = relationship("Statement", back_populates="tags")
+    tagger = relationship("User")
 
 
 class Comment(Base):

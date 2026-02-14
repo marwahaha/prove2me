@@ -405,6 +405,130 @@ a:hover {
   font-size: 0.9rem;
 }
 
+/* Tags */
+.tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: #e3f2fd;
+  color: #1565c0;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s;
+}
+
+.tag-pill:hover {
+  background: #bbdefb;
+}
+
+.tag-pill.tag-add {
+  background: #f0f0f0;
+  color: #666;
+  border: 1px dashed #ccc;
+}
+
+.tag-pill.tag-add:hover {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.tag-pill .tag-delete {
+  font-size: 0.85rem;
+  line-height: 1;
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.tag-pill .tag-delete:hover {
+  opacity: 1;
+}
+
+.tag-pill.tag-filter-pill {
+  background: #1565c0;
+  color: white;
+}
+
+.tag-pill.tag-filter-pill:hover {
+  background: #0d47a1;
+}
+
+.tag-pill.tag-filter-pill .tag-delete {
+  opacity: 0.7;
+  color: white;
+}
+
+.tag-pill.tag-filter-pill .tag-delete:hover {
+  opacity: 1;
+}
+
+.statement-row-tags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: nowrap;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.tags-filter {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+}
+
+.tags-filter-label {
+  font-size: 0.85rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.tag-input-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.tag-input {
+  padding: 2px 8px;
+  border: 1px solid #1565c0;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  outline: none;
+  width: 120px;
+}
+
+.tag-input:focus {
+  border-color: #0d47a1;
+}
+
+.tag-autocomplete {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 100;
+  margin-top: 2px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.tag-autocomplete-item {
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.tag-autocomplete-item:hover {
+  background: #f0f0f0;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .header .container {

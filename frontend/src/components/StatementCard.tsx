@@ -1,13 +1,41 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { StatementListItem } from '../api/client';
+import { StatementListItem, tagsApi } from '../api/client';
 import { formatTimeAgo } from '../utils/time';
+import { useAuth } from '../contexts/AuthContext';
+import TagInput from './TagInput';
+import toast from 'react-hot-toast';
 
 interface StatementCardProps {
   statement: StatementListItem;
+  onTagClick?: (tagName: string) => void;
+  onTagsChanged?: () => void;
 }
 
-export default function StatementCard({ statement }: StatementCardProps) {
+export default function StatementCard({ statement, onTagClick, onTagsChanged }: StatementCardProps) {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [showTagInput, setShowTagInput] = useState(false);
+
+  const handleAddTag = async (tagName: string) => {
+    try {
+      await tagsApi.create(statement.id, tagName);
+      setShowTagInput(false);
+      onTagsChanged?.();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to add tag');
+    }
+  };
+
+  const handleDeleteTag = async (e: React.MouseEvent, tagName: string) => {
+    e.stopPropagation();
+    try {
+      await tagsApi.delete(statement.id, tagName);
+      onTagsChanged?.();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to delete tag');
+    }
+  };
 
   return (
     <div
@@ -15,6 +43,45 @@ export default function StatementCard({ statement }: StatementCardProps) {
       onClick={() => navigate(`/statement/${statement.id}`)}
     >
       <span className="statement-row-title">{statement.title}</span>
+      <div className="statement-row-tags" onClick={(e) => e.stopPropagation()}>
+        {statement.tags?.map((tag) => (
+          <span
+            key={tag}
+            className="tag-pill"
+            onClick={(e) => {
+              e.stopPropagation();
+              onTagClick?.(tag);
+            }}
+          >
+            {tag}
+            {user?.is_admin && (
+              <span
+                className="tag-delete"
+                onClick={(e) => handleDeleteTag(e, tag)}
+              >
+                &times;
+              </span>
+            )}
+          </span>
+        ))}
+        {user && !showTagInput && (
+          <span
+            className="tag-pill tag-add"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowTagInput(true);
+            }}
+          >
+            + Tag
+          </span>
+        )}
+        {showTagInput && (
+          <TagInput
+            onSubmit={handleAddTag}
+            onCancel={() => setShowTagInput(false)}
+          />
+        )}
+      </div>
       <span className="statement-row-meta">
         {statement.submitter.username}
         <span className="statement-row-time">{formatTimeAgo(statement.created_at)}</span>

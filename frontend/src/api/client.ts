@@ -60,6 +60,14 @@ export interface CompileResult {
   error: string | null;
 }
 
+export interface Comment {
+  id: string;
+  content: string;
+  author: UserPublic;
+  created_at: string;
+  updated_at: string | null;
+}
+
 export interface PrizeSettings {
   base_points: number;
   growth_rate: number;
@@ -206,6 +214,29 @@ export const adminApi = {
     request<{ message: string }>(`/admin/statements/${statementId}/title`, {
       method: 'PUT',
       body: JSON.stringify({ title }),
+    }),
+};
+
+// Comments API
+export const commentsApi = {
+  list: (statementId: string) =>
+    request<Comment[]>(`/statements/${statementId}/comments`),
+
+  create: (statementId: string, content: string) =>
+    request<Comment>(`/statements/${statementId}/comments`, {
+      method: 'POST',
+      body: JSON.stringify({ content }),
+    }),
+
+  update: (commentId: string, content: string) =>
+    request<Comment>(`/comments/${commentId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ content }),
+    }),
+
+  delete: (commentId: string) =>
+    request<{ message: string }>(`/comments/${commentId}`, {
+      method: 'DELETE',
     }),
 };
 

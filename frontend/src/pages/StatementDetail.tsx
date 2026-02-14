@@ -4,6 +4,7 @@ import { statementsApi, proofsApi, adminApi, Statement } from '../api/client';
 import { formatTimeAgo } from '../utils/time';
 import { useAuth } from '../contexts/AuthContext';
 import CodeEditor from '../components/CodeEditor';
+import CommentSection from '../components/CommentSection';
 import toast from 'react-hot-toast';
 
 export default function StatementDetail() {
@@ -285,6 +286,8 @@ theorem my_proof : ∀ n : Nat, n + 0 = n := by
           <p>Please log in to submit a proof.</p>
         </div>
       )}
+
+      {user && <CommentSection statementId={statement.id} />}
     </div>
   );
 }

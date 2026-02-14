@@ -28,6 +28,7 @@ class User(Base):
         back_populates="solver",
         foreign_keys="Statement.solver_id"
     )
+    comments = relationship("Comment", back_populates="author")
 
 
 class Statement(Base):
@@ -57,6 +58,21 @@ class Statement(Base):
         back_populates="solved_statements",
         foreign_keys=[solver_id]
     )
+    comments = relationship("Comment", back_populates="statement")
+
+
+class Comment(Base):
+    __tablename__ = "comments"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    content = Column(Text, nullable=False)
+    statement_id = Column(UUID(as_uuid=True), ForeignKey("statements.id"), nullable=False)
+    author_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=True)
+
+    statement = relationship("Statement", back_populates="comments")
+    author = relationship("User", back_populates="comments")
 
 
 class Setting(Base):

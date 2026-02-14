@@ -129,6 +129,26 @@ class BannerUpdate(BaseModel):
     message: str
 
 
+# Comment schemas
+class CommentCreate(BaseModel):
+    content: str
+
+
+class CommentUpdate(BaseModel):
+    content: str
+
+
+class CommentResponse(BaseModel):
+    id: UUID
+    content: str
+    author: UserPublic
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
 # Compile result
 class CompileResult(BaseModel):
     success: bool

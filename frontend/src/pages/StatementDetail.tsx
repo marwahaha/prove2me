@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { statementsApi, proofsApi, adminApi, Statement } from '../api/client';
+import { formatTimeAgo } from '../utils/time';
 import { useAuth } from '../contexts/AuthContext';
 import CodeEditor from '../components/CodeEditor';
 import toast from 'react-hot-toast';
@@ -148,11 +149,13 @@ export default function StatementDetail() {
           </span>
         </div>
 
-        <div className="statement-meta" style={{ marginBottom: '20px' }}>
-          <span>Submitted by {statement.submitter.username}</span>
-          <span>{new Date(statement.created_at).toLocaleDateString()}</span>
+        <div className="statement-meta" style={{ marginBottom: '20px', display: 'flex', gap: '8px', flexWrap: 'wrap', color: '#666', fontSize: '0.9rem' }}>
+          <span>Submitted by {statement.submitter.username} ({formatTimeAgo(statement.created_at)})</span>
           {statement.is_solved && statement.solver && (
-            <span>Solved by {statement.solver.username}</span>
+            <>
+              <span>·</span>
+              <span>Solved by {statement.solver.username} ({formatTimeAgo(statement.solved_at!)})</span>
+            </>
           )}
         </div>
 

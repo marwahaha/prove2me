@@ -37,7 +37,7 @@ export default function Dashboard() {
         <label>Sort by: </label>
         <select value={sortBy} onChange={(e) => setSortBy(e.target.value as 'newest' | 'prize')}>
           <option value="newest">Newest</option>
-          <option value="prize">Highest Prize</option>
+          <option value="prize">Most Points</option>
         </select>
       </div>
 

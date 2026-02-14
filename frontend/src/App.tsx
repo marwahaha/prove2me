@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
+import Banner from './components/Banner';
 import Header from './components/Header';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
@@ -22,6 +23,7 @@ function App() {
   return (
     <div className="app">
       <Header />
+      <Banner />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />

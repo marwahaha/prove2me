@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { adminApi, User, PrizeSettings, StatementListItem } from '../api/client';
+import { adminApi, bannerApi, User, PrizeSettings, StatementListItem } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -11,6 +11,10 @@ export default function Admin() {
   const [allStatements, setAllStatements] = useState<StatementListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'users' | 'settings' | 'statements'>('users');
+
+  // Banner state
+  const [bannerMessage, setBannerMessage] = useState('');
+  const [savingBanner, setSavingBanner] = useState(false);
 
   // Settings form state
   const [basePoints, setBasePoints] = useState('');
@@ -25,15 +29,17 @@ export default function Admin() {
 
   const loadData = async () => {
     try {
-      const [pending, settingsData, statements, users] = await Promise.all([
+      const [pending, settingsData, statements, users, banner] = await Promise.all([
         adminApi.getPendingUsers(),
         adminApi.getSettings(),
         adminApi.getAllStatements(),
         adminApi.getAllUsers(),
+        bannerApi.get(),
       ]);
 
       setPendingUsers(pending);
       setSettings(settingsData);
+      setBannerMessage(banner.message);
       setAllStatements(statements);
       setAllUsers(users);
 
@@ -120,6 +126,19 @@ export default function Admin() {
       toast.error(error.message || 'Failed to save settings');
     } finally {
       setSavingSettings(false);
+    }
+  };
+
+  const handleSaveBanner = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingBanner(true);
+    try {
+      await adminApi.setBanner(bannerMessage);
+      toast.success(bannerMessage ? 'Banner updated' : 'Banner cleared');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to save banner');
+    } finally {
+      setSavingBanner(false);
     }
   };
 
@@ -255,6 +274,31 @@ export default function Admin() {
 
       {activeTab === 'settings' && (
         <div className="admin-section">
+          <h3>Site Banner</h3>
+          <div className="card" style={{ marginBottom: '30px' }}>
+            <form onSubmit={handleSaveBanner}>
+              <div className="form-group">
+                <label htmlFor="bannerMessage">Banner Message</label>
+                <input
+                  type="text"
+                  id="bannerMessage"
+                  value={bannerMessage}
+                  onChange={(e) => setBannerMessage(e.target.value)}
+                  placeholder="Enter a message to display site-wide (leave empty to hide)"
+                />
+                <small style={{ color: '#666' }}>Displayed at the top of every page. Submit empty to clear.</small>
+              </div>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={savingBanner}
+                style={{ marginTop: '10px' }}
+              >
+                {savingBanner ? 'Saving...' : 'Save Banner'}
+              </button>
+            </form>
+          </div>
+
           <h3>Prize Settings</h3>
           <div className="card">
             <form onSubmit={handleSaveSettings}>

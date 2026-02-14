@@ -4,10 +4,11 @@ from sqlalchemy import desc
 from typing import List
 from uuid import UUID
 from ..database import get_db
-from ..models import User, Statement
-from ..schemas import UserResponse, SettingsResponse, SettingsUpdate, StatementListItem, PasswordReset
+from ..models import User, Statement, Setting
+from ..schemas import UserResponse, SettingsResponse, SettingsUpdate, StatementListItem, PasswordReset, BannerResponse, BannerUpdate
 from ..auth import get_current_admin, hash_password
 from ..prize import get_prize_settings, set_prize_setting
+import json
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
@@ -224,3 +225,22 @@ def toggle_admin(
     db.refresh(user)
 
     return user
+
+
+@router.get("/banner", response_model=BannerResponse)
+def get_banner(db: Session = Depends(get_db)):
+    """Get the site-wide banner message. Public endpoint, no auth required."""
+    setting = db.query(Setting).filter(Setting.key == "banner_message").first()
+    message = json.loads(setting.value) if setting else ""
+    return BannerResponse(message=message)
+
+
+@router.put("/banner", response_model=BannerResponse)
+def set_banner(
+    banner: BannerUpdate,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    """Set the site-wide banner message. Admin only."""
+    set_prize_setting(db, "banner_message", banner.message)
+    return BannerResponse(message=banner.message)

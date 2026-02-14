@@ -155,6 +155,11 @@ export const leaderboardApi = {
   get: () => request<LeaderboardEntry[]>('/leaderboard'),
 };
 
+// Banner API (public)
+export const bannerApi = {
+  get: () => request<{ message: string }>('/admin/banner'),
+};
+
 // Admin API
 export const adminApi = {
   getPendingUsers: () => request<User[]>('/admin/pending-users'),
@@ -187,6 +192,12 @@ export const adminApi = {
 
   toggleAdmin: (userId: string) =>
     request<User>(`/admin/toggle-admin/${userId}`, { method: 'POST' }),
+
+  setBanner: (message: string) =>
+    request<{ message: string }>('/admin/banner', {
+      method: 'PUT',
+      body: JSON.stringify({ message }),
+    }),
 };
 
 export { ApiError };

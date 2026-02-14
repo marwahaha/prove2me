@@ -59,7 +59,7 @@ def list_statements(
     db: Session = Depends(get_db)
 ):
     """List all unsolved statements."""
-    query = db.query(Statement).filter(Statement.is_solved == False)
+    query = db.query(Statement).filter(Statement.is_solved == False, Statement.is_archived == False)
 
     if sort_by == "newest":
         query = query.order_by(desc(Statement.created_at))
@@ -82,7 +82,7 @@ def list_solved_statements(
 ):
     """List all solved statements."""
     statements = db.query(Statement).filter(
-        Statement.is_solved == True
+        Statement.is_solved == True, Statement.is_archived == False
     ).order_by(desc(Statement.solved_at)).all()
 
     return [add_current_prize_list_item(s, db) for s in statements]
@@ -95,7 +95,8 @@ def list_my_statements(
 ):
     """List current user's submitted statements."""
     statements = db.query(Statement).filter(
-        Statement.submitter_id == current_user.id
+        Statement.submitter_id == current_user.id,
+        Statement.is_archived == False,
     ).order_by(desc(Statement.created_at)).all()
 
     return [add_current_prize_list_item(s, db) for s in statements]
@@ -122,7 +123,7 @@ def get_statement(
     """Get a specific statement by ID."""
     statement = db.query(Statement).filter(Statement.id == statement_id).first()
 
-    if not statement:
+    if not statement or statement.is_archived:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Statement not found"
@@ -145,7 +146,8 @@ def create_statement(
         one_day_ago = datetime.utcnow() - timedelta(days=1)
         recent_count = db.query(Statement).filter(
             Statement.submitter_id == current_user.id,
-            Statement.created_at >= one_day_ago
+            Statement.created_at >= one_day_ago,
+            Statement.is_archived == False,
         ).count()
 
         if recent_count >= max_per_day:
@@ -189,3 +191,24 @@ def compile_code(
         success=success,
         error=error if not success else None
     )
+
+
+@router.post("/{statement_id}/archive")
+def archive_statement(
+    statement_id: UUID,
+    current_user: User = Depends(get_current_approved_user),
+    db: Session = Depends(get_db),
+):
+    """Archive an unsolved statement. Only the submitter can do this."""
+    statement = db.query(Statement).filter(Statement.id == statement_id).first()
+    if not statement:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Statement not found")
+    if str(statement.submitter_id) != str(current_user.id) and not current_user.is_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You can only archive your own statements")
+    if statement.is_solved:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot archive a solved statement")
+    if statement.is_archived:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Statement is already archived")
+    statement.is_archived = True
+    db.commit()
+    return {"message": "Statement archived"}

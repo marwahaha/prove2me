@@ -39,6 +39,7 @@ class Statement(Base):
     lean_code = Column(Text, nullable=False)
     submitter_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     is_solved = Column(Boolean, default=False)
+    is_archived = Column(Boolean, default=False)
     solved_at = Column(DateTime, nullable=True)
     solver_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     proof_code = Column(Text, nullable=True)

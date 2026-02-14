@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { statementsApi, proofsApi, adminApi, Statement } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 import CodeEditor from '../components/CodeEditor';
@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 
 export default function StatementDetail() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { user, refreshUser } = useAuth();
   const [statement, setStatement] = useState<Statement | null>(null);
   const [loading, setLoading] = useState(true);
@@ -83,6 +84,17 @@ export default function StatementDetail() {
     );
   }
 
+  const handleArchive = async () => {
+    if (!statement || !confirm('Are you sure you want to archive this statement? It will be hidden from public listings.')) return;
+    try {
+      await statementsApi.archive(statement.id);
+      toast.success('Statement archived');
+      navigate('/profile');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to archive statement');
+    }
+  };
+
   const handleSaveTitle = async () => {
     if (!titleDraft.trim() || !statement) return;
     try {
@@ -154,6 +166,16 @@ export default function StatementDetail() {
 
         <h3 style={{ marginBottom: '10px' }}>Proposition</h3>
         <CodeEditor value={statement.lean_code} onChange={() => {}} readOnly height="200px" />
+
+        {!statement.is_solved && (isOwnStatement || user?.is_admin) && (
+          <button
+            className="btn btn-danger btn-small"
+            style={{ marginTop: '15px' }}
+            onClick={handleArchive}
+          >
+            Archive Statement
+          </button>
+        )}
       </div>
 
       {statement.is_solved ? (

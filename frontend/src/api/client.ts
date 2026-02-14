@@ -134,6 +134,9 @@ export const statementsApi = {
 
   solvedByMe: () => request<StatementListItem[]>('/statements/solved'),
 
+  archive: (id: string) =>
+    request<{ message: string }>(`/statements/${id}/archive`, { method: 'POST' }),
+
   compile: (title: string, lean_code: string, definitions?: string) =>
     request<CompileResult>('/statements/compile', {
       method: 'POST',

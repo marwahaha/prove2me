@@ -23,7 +23,7 @@ def submit_proof(
     # Get the statement
     statement = db.query(Statement).filter(Statement.id == statement_id).first()
 
-    if not statement:
+    if not statement or statement.is_archived:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Statement not found"

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { statementsApi, proofsApi, Statement } from '../api/client';
+import { statementsApi, proofsApi, adminApi, Statement } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 import CodeEditor from '../components/CodeEditor';
 import toast from 'react-hot-toast';
@@ -15,6 +15,8 @@ export default function StatementDetail() {
   const [theoremName, setTheoremName] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [proofResult, setProofResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [titleDraft, setTitleDraft] = useState('');
 
   useEffect(() => {
     loadStatement();
@@ -81,13 +83,54 @@ export default function StatementDetail() {
     );
   }
 
+  const handleSaveTitle = async () => {
+    if (!titleDraft.trim() || !statement) return;
+    try {
+      await adminApi.updateStatementTitle(statement.id, titleDraft.trim());
+      setStatement({ ...statement, title: titleDraft.trim() });
+      setEditingTitle(false);
+      toast.success('Title updated');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update title');
+    }
+  };
+
   const isOwnStatement = user && statement.submitter.id === user.id;
 
   return (
     <div className="container main-content">
       <div className="card">
         <div className="card-header">
-          <h1 className="card-title">{statement.title}</h1>
+          {editingTitle ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+              <input
+                type="text"
+                value={titleDraft}
+                onChange={(e) => setTitleDraft(e.target.value)}
+                style={{ flex: 1, fontSize: '1.2em' }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleSaveTitle();
+                  if (e.key === 'Escape') setEditingTitle(false);
+                }}
+                autoFocus
+              />
+              <button className="btn btn-success btn-small" onClick={handleSaveTitle}>Save</button>
+              <button className="btn btn-secondary btn-small" onClick={() => setEditingTitle(false)}>Cancel</button>
+            </div>
+          ) : (
+            <h1 className="card-title">
+              {statement.title}
+              {user?.is_admin && (
+                <button
+                  className="btn btn-secondary btn-small"
+                  style={{ marginLeft: '10px', fontSize: '12px' }}
+                  onClick={() => { setTitleDraft(statement.title); setEditingTitle(true); }}
+                >
+                  Edit
+                </button>
+              )}
+            </h1>
+          )}
           <span className={`prize-badge ${statement.is_solved ? 'solved' : ''}`}>
             {statement.is_solved ? 'Solved' : `${statement.current_prize} pts`}
           </span>

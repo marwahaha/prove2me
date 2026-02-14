@@ -5,7 +5,7 @@ from typing import List
 from uuid import UUID
 from ..database import get_db
 from ..models import User, Statement, Setting
-from ..schemas import UserResponse, SettingsResponse, SettingsUpdate, StatementListItem, PasswordReset, BannerResponse, BannerUpdate
+from ..schemas import UserResponse, SettingsResponse, SettingsUpdate, StatementListItem, PasswordReset, BannerResponse, BannerUpdate, StatementTitleUpdate, StatementResponse
 from ..auth import get_current_admin, hash_password
 from ..prize import get_prize_settings, set_prize_setting
 import json
@@ -244,3 +244,27 @@ def set_banner(
     """Set the site-wide banner message. Admin only."""
     set_prize_setting(db, "banner_message", banner.message)
     return BannerResponse(message=banner.message)
+
+
+@router.put("/statements/{statement_id}/title")
+def update_statement_title(
+    statement_id: UUID,
+    data: StatementTitleUpdate,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    """Update a statement's title. Admin only."""
+    statement = db.query(Statement).filter(Statement.id == statement_id).first()
+    if not statement:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Statement not found",
+        )
+    if not data.title.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Title cannot be empty",
+        )
+    statement.title = data.title.strip()
+    db.commit()
+    return {"message": "Title updated"}

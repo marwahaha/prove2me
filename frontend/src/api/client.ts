@@ -198,6 +198,12 @@ export const adminApi = {
       method: 'PUT',
       body: JSON.stringify({ message }),
     }),
+
+  updateStatementTitle: (statementId: string, title: string) =>
+    request<{ message: string }>(`/admin/statements/${statementId}/title`, {
+      method: 'PUT',
+      body: JSON.stringify({ title }),
+    }),
 };
 
 export { ApiError };

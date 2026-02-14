@@ -117,6 +117,10 @@ class SettingsUpdate(BaseModel):
     max_statements_per_day: Optional[int] = None
 
 
+class StatementTitleUpdate(BaseModel):
+    title: str
+
+
 class BannerResponse(BaseModel):
     message: str
 

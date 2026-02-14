@@ -91,6 +91,17 @@ def compile_statement(statement_code: str, definitions: str = None) -> tuple[boo
     The user submits a proposition (e.g., "∀ n : Nat, n + 0 = n").
     We wrap it to verify it has type Prop.
     """
+    # Check for sorry/admit/axiom in statement and definitions
+    for keyword in ["sorry", "admit"]:
+        if keyword in statement_code:
+            return False, f"Statement cannot contain '{keyword}'"
+        if definitions and keyword in definitions:
+            return False, f"Definitions cannot contain '{keyword}'"
+    if re.search(r'\baxiom\b', statement_code):
+        return False, "Statement cannot contain axiom declarations"
+    if definitions and re.search(r'\baxiom\b', definitions):
+        return False, "Definitions cannot contain axiom declarations"
+
     # Build the code with optional definitions
     definitions_block = definitions.strip() + "\n\n" if definitions and definitions.strip() else ""
 
@@ -122,11 +133,15 @@ def compile_proof(statement_code: str, proof_code: str, theorem_name: str, defin
     The user submits full Lean code and specifies which theorem proves the statement.
     Compilation order: imports → definitions → proposition → proof code.
     """
-    # Check for sorry in both imports and proof code
+    # Check for sorry/admit in both imports and proof code
     if "sorry" in proof_code:
         return False, "Proof cannot contain 'sorry'"
     if imports and "sorry" in imports:
         return False, "Imports cannot contain 'sorry'"
+    if "admit" in proof_code:
+        return False, "Proof cannot contain 'admit'"
+    if imports and "admit" in imports:
+        return False, "Imports cannot contain 'admit'"
 
     # Check for axiom declarations - users could cheat by declaring arbitrary axioms
     if re.search(r'\baxiom\b', proof_code):

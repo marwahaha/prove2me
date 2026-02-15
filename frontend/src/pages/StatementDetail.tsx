@@ -22,6 +22,12 @@ export default function StatementDetail() {
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState('');
   const [showTagInput, setShowTagInput] = useState(false);
+  const [editingContent, setEditingContent] = useState(false);
+  const [definitionsDraft, setDefinitionsDraft] = useState('');
+  const [leanCodeDraft, setLeanCodeDraft] = useState('');
+  const [compileError, setCompileError] = useState<string | null>(null);
+  const [compiling, setCompiling] = useState(false);
+  const [savingContent, setSavingContent] = useState(false);
 
   useEffect(() => {
     loadStatement();
@@ -103,11 +109,52 @@ export default function StatementDetail() {
     if (!titleDraft.trim() || !statement) return;
     try {
       await adminApi.updateStatementTitle(statement.id, titleDraft.trim());
-      setStatement({ ...statement, title: titleDraft.trim() });
       setEditingTitle(false);
       toast.success('Title updated');
+      await loadStatement();
     } catch (error: any) {
       toast.error(error.message || 'Failed to update title');
+    }
+  };
+
+  const startEditingContent = () => {
+    if (!statement) return;
+    setDefinitionsDraft(statement.definitions || '');
+    setLeanCodeDraft(statement.lean_code);
+    setCompileError(null);
+    setEditingContent(true);
+  };
+
+  const handleTestCompile = async () => {
+    setCompiling(true);
+    setCompileError(null);
+    try {
+      const result = await statementsApi.compile('test', leanCodeDraft, definitionsDraft || undefined);
+      if (result.success) {
+        toast.success('Compilation successful');
+      } else {
+        setCompileError(result.error || 'Compilation failed');
+      }
+    } catch (error: any) {
+      setCompileError(error.message || 'Compilation failed');
+    } finally {
+      setCompiling(false);
+    }
+  };
+
+  const handleSaveContent = async () => {
+    if (!statement) return;
+    setSavingContent(true);
+    setCompileError(null);
+    try {
+      await adminApi.updateStatementContent(statement.id, leanCodeDraft, definitionsDraft || null);
+      setEditingContent(false);
+      toast.success('Statement content updated');
+      await loadStatement();
+    } catch (error: any) {
+      setCompileError(error.message || 'Failed to save');
+    } finally {
+      setSavingContent(false);
     }
   };
 
@@ -181,6 +228,12 @@ export default function StatementDetail() {
               <span>Solved by {statement.solver.username} ({formatTimeAgo(statement.solved_at!)})</span>
             </>
           )}
+          {statement.updated_at && (
+            <>
+              <span>·</span>
+              <span>(edited by {statement.last_edited_by?.username ?? 'admin'} {formatTimeAgo(statement.updated_at)})</span>
+            </>
+          )}
         </div>
 
         <div className="statement-detail-tags" style={{ marginBottom: '20px', display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -200,16 +253,57 @@ export default function StatementDetail() {
           )}
         </div>
 
-        {statement.definitions && (
+        {editingContent ? (
           <>
             <h3 style={{ marginBottom: '10px' }}>Definitions</h3>
-            <CodeEditor value={statement.definitions} onChange={() => {}} readOnly height="150px" />
+            <CodeEditor value={definitionsDraft} onChange={setDefinitionsDraft} height="150px" />
             <div style={{ marginTop: '20px' }} />
+
+            <h3 style={{ marginBottom: '10px' }}>Proposition</h3>
+            <CodeEditor value={leanCodeDraft} onChange={setLeanCodeDraft} height="200px" />
+
+            {compileError && (
+              <div className="error-message" style={{ marginTop: '10px', whiteSpace: 'pre-wrap' }}>
+                {compileError}
+              </div>
+            )}
+
+            <div style={{ marginTop: '15px', display: 'flex', gap: '8px' }}>
+              <button className="btn btn-secondary" onClick={handleTestCompile} disabled={compiling || savingContent}>
+                {compiling ? 'Compiling...' : 'Test Compile'}
+              </button>
+              <button className="btn btn-success" onClick={handleSaveContent} disabled={compiling || savingContent}>
+                {savingContent ? 'Saving...' : 'Save'}
+              </button>
+              <button className="btn btn-secondary" onClick={() => setEditingContent(false)} disabled={compiling || savingContent}>
+                Cancel
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            {statement.definitions && (
+              <>
+                <h3 style={{ marginBottom: '10px' }}>Definitions</h3>
+                <CodeEditor value={statement.definitions} onChange={() => {}} readOnly height="150px" />
+                <div style={{ marginTop: '20px' }} />
+              </>
+            )}
+
+            <h3 style={{ marginBottom: '10px' }}>Proposition</h3>
+            <CodeEditor value={statement.lean_code} onChange={() => {}} readOnly height="200px" />
+
+            {user?.is_admin && !statement.is_solved && (
+              <button
+                className="btn btn-secondary btn-small"
+                style={{ marginTop: '10px' }}
+                onClick={startEditingContent}
+              >
+                Edit Definitions & Proposition
+              </button>
+            )}
           </>
         )}
-
-        <h3 style={{ marginBottom: '10px' }}>Proposition</h3>
-        <CodeEditor value={statement.lean_code} onChange={() => {}} readOnly height="200px" />
 
         {!statement.is_solved && (isOwnStatement || user?.is_admin) && (
           <button

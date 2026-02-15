@@ -39,6 +39,8 @@ def add_current_prize(statement: Statement, db: Session) -> dict:
         "proof_imports": statement.proof_imports,
         "proof_theorem_name": statement.proof_theorem_name,
         "created_at": statement.created_at,
+        "updated_at": statement.updated_at,
+        "last_edited_by": statement.last_edited_by,
         "current_prize": prize,
         "tags": _build_tags(statement),
     }
@@ -157,7 +159,8 @@ def get_statement(
 ):
     """Get a specific statement by ID."""
     statement = db.query(Statement).options(
-        joinedload(Statement.tags).joinedload(Tag.tagger)
+        joinedload(Statement.tags).joinedload(Tag.tagger),
+        joinedload(Statement.last_edited_by),
     ).filter(Statement.id == statement_id).first()
 
     if not statement or statement.is_archived:

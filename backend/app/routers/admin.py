@@ -5,7 +5,7 @@ from typing import List
 from uuid import UUID
 from ..database import get_db
 from ..models import User, Statement, Setting
-from ..schemas import UserResponse, SettingsResponse, SettingsUpdate, StatementListItem, PasswordReset, BannerResponse, BannerUpdate, StatementTitleUpdate, StatementResponse
+from ..schemas import UserResponse, SettingsResponse, SettingsUpdate, StatementListItem, PasswordReset, BannerResponse, BannerUpdate, StatementTitleUpdate, StatementContentUpdate, StatementResponse
 from ..auth import get_current_admin, hash_password
 from ..prize import get_prize_settings, set_prize_setting
 import json
@@ -265,6 +265,49 @@ def update_statement_title(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Title cannot be empty",
         )
+    from datetime import datetime
+
     statement.title = data.title.strip()
+    statement.updated_at = datetime.utcnow()
+    statement.last_edited_by_id = current_user.id
     db.commit()
     return {"message": "Title updated"}
+
+
+@router.put("/statements/{statement_id}/content")
+def update_statement_content(
+    statement_id: UUID,
+    data: StatementContentUpdate,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    """Update a statement's definitions and proposition. Admin only."""
+    from ..lean_runner import compile_statement
+
+    statement = db.query(Statement).filter(Statement.id == statement_id).first()
+    if not statement:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Statement not found",
+        )
+    if statement.is_solved:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot edit a solved statement",
+        )
+
+    success, error = compile_statement(data.lean_code, data.definitions)
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Lean compilation failed: {error}",
+        )
+
+    from datetime import datetime
+
+    statement.definitions = data.definitions
+    statement.lean_code = data.lean_code
+    statement.updated_at = datetime.utcnow()
+    statement.last_edited_by_id = current_user.id
+    db.commit()
+    return {"message": "Statement content updated"}

@@ -47,6 +47,8 @@ class Statement(Base):
     proof_imports = Column(Text, nullable=True)
     proof_theorem_name = Column(String(200), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=True)
+    last_edited_by_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
 
     submitter = relationship(
         "User",
@@ -57,6 +59,10 @@ class Statement(Base):
         "User",
         back_populates="solved_statements",
         foreign_keys=[solver_id]
+    )
+    last_edited_by = relationship(
+        "User",
+        foreign_keys=[last_edited_by_id]
     )
     comments = relationship("Comment", back_populates="statement")
     tags = relationship("Tag", back_populates="statement")

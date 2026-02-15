@@ -29,6 +29,8 @@ export interface Statement {
   proof_imports: string | null;
   proof_theorem_name: string | null;
   created_at: string;
+  updated_at: string | null;
+  last_edited_by: UserPublic | null;
   current_prize: number | null;
   tags: string[];
 }
@@ -224,6 +226,12 @@ export const adminApi = {
     request<{ message: string }>(`/admin/statements/${statementId}/title`, {
       method: 'PUT',
       body: JSON.stringify({ title }),
+    }),
+
+  updateStatementContent: (statementId: string, lean_code: string, definitions?: string | null) =>
+    request<{ message: string }>(`/admin/statements/${statementId}/content`, {
+      method: 'PUT',
+      body: JSON.stringify({ lean_code, definitions }),
     }),
 };
 

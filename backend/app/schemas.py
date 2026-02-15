@@ -74,6 +74,8 @@ class StatementResponse(BaseModel):
     proof_imports: Optional[str] = None
     proof_theorem_name: Optional[str] = None
     created_at: datetime
+    updated_at: Optional[datetime] = None
+    last_edited_by: Optional[UserPublic] = None
     current_prize: Optional[int] = None
     tags: list[str] = []
 
@@ -137,6 +139,11 @@ class SettingsUpdate(BaseModel):
 
 class StatementTitleUpdate(BaseModel):
     title: str
+
+
+class StatementContentUpdate(BaseModel):
+    definitions: Optional[str] = None
+    lean_code: str
 
 
 class BannerResponse(BaseModel):

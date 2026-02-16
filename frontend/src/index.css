@@ -252,6 +252,16 @@ a:hover {
   color: #999;
 }
 
+.username-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.username-link:hover {
+  text-decoration: underline;
+  color: #4CAF50;
+}
+
 .prize-badge {
   background: #ff9800;
   color: white;

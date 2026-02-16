@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { StatementListItem, tagsApi } from '../api/client';
 import { formatTimeAgo } from '../utils/time';
 import { useAuth } from '../contexts/AuthContext';
@@ -83,7 +83,7 @@ export default function StatementCard({ statement, onTagClick, onTagsChanged }: 
         )}
       </div>
       <span className="statement-row-meta">
-        {statement.submitter.username}
+        <Link to={`/user/${statement.submitter.username}`} onClick={(e) => e.stopPropagation()} className="username-link">{statement.submitter.username}</Link>
         <span className="statement-row-time">{formatTimeAgo(statement.created_at)}</span>
       </span>
       {statement.is_solved && statement.solver ? (

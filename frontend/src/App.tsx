@@ -11,6 +11,7 @@ import StatementDetail from './pages/StatementDetail';
 import Solved from './pages/Solved';
 import Leaderboard from './pages/Leaderboard';
 import Profile from './pages/Profile';
+import UserProfile from './pages/UserProfile';
 import Admin from './pages/Admin';
 
 function App() {
@@ -72,6 +73,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/user/:username"
+          element={
+            <ProtectedRoute>
+              <UserProfile />
             </ProtectedRoute>
           }
         />

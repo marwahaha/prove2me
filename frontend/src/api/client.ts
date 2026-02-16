@@ -47,6 +47,14 @@ export interface StatementListItem {
   tags: string[];
 }
 
+export interface UserProfileResponse {
+  username: string;
+  points: number;
+  created_at: string;
+  submitted_count: number;
+  solved_count: number;
+}
+
 export interface LeaderboardEntry {
   rank: number;
   username: string;
@@ -274,6 +282,18 @@ export const tagsApi = {
 
   autocomplete: (query: string) =>
     request<string[]>(`/tags/autocomplete?q=${encodeURIComponent(query)}`),
+};
+
+// Users API (public profiles)
+export const usersApi = {
+  getProfile: (username: string) =>
+    request<UserProfileResponse>(`/users/${encodeURIComponent(username)}`),
+
+  getStatements: (username: string) =>
+    request<StatementListItem[]>(`/users/${encodeURIComponent(username)}/statements`),
+
+  getSolved: (username: string) =>
+    request<StatementListItem[]>(`/users/${encodeURIComponent(username)}/solved`),
 };
 
 export { ApiError };

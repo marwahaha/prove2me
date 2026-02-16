@@ -38,6 +38,17 @@ class UserPublic(BaseModel):
         from_attributes = True
 
 
+class UserProfileResponse(BaseModel):
+    username: str
+    points: int
+    created_at: datetime
+    submitted_count: int
+    solved_count: int
+
+    class Config:
+        from_attributes = True
+
+
 # Tag schemas
 class TagCreate(BaseModel):
     tag_name: str

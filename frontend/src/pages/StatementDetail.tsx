@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { statementsApi, proofsApi, adminApi, tagsApi, Statement } from '../api/client';
 import { formatTimeAgo } from '../utils/time';
 import { useAuth } from '../contexts/AuthContext';
@@ -221,11 +221,11 @@ export default function StatementDetail() {
         </div>
 
         <div className="statement-meta" style={{ marginBottom: '20px', display: 'flex', gap: '8px', flexWrap: 'wrap', color: '#666', fontSize: '0.9rem' }}>
-          <span>Submitted by {statement.submitter.username} ({formatTimeAgo(statement.created_at)})</span>
+          <span>Submitted by <Link to={`/user/${statement.submitter.username}`}>{statement.submitter.username}</Link> ({formatTimeAgo(statement.created_at)})</span>
           {statement.is_solved && statement.solver && (
             <>
               <span>·</span>
-              <span>Solved by {statement.solver.username} ({formatTimeAgo(statement.solved_at!)})</span>
+              <span>Solved by <Link to={`/user/${statement.solver.username}`}>{statement.solver.username}</Link> ({formatTimeAgo(statement.solved_at!)})</span>
             </>
           )}
           {statement.updated_at && (
@@ -319,7 +319,7 @@ export default function StatementDetail() {
       {statement.is_solved ? (
         <div className="card">
           <div className="success-message" style={{ marginBottom: '20px' }}>
-            Solved by {statement.solver?.username} on {new Date(statement.solved_at!).toLocaleDateString()}
+            Solved by <Link to={`/user/${statement.solver?.username}`}>{statement.solver?.username}</Link> on {new Date(statement.solved_at!).toLocaleDateString()}
           </div>
           <h3 style={{ marginBottom: '10px' }}>Proof</h3>
           {statement.proof_theorem_name && (

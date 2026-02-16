@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { leaderboardApi, LeaderboardEntry } from '../api/client';
 import toast from 'react-hot-toast';
 
@@ -61,7 +62,7 @@ export default function Leaderboard() {
                       #{entry.rank}
                     </span>
                   </td>
-                  <td>{entry.username}</td>
+                  <td><Link to={`/user/${entry.username}`}>{entry.username}</Link></td>
                   <td style={{ textAlign: 'right', fontWeight: 600 }}>
                     {entry.points.toLocaleString()}
                   </td>

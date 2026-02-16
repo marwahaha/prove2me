@@ -1,14 +1,41 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.orm import Session, joinedload
 from typing import List
 from uuid import UUID
 from datetime import datetime
 from ..database import get_db
 from ..models import User, Statement, Comment
-from ..schemas import CommentCreate, CommentUpdate, CommentResponse
+from ..schemas import CommentCreate, CommentUpdate, CommentResponse, PaginatedComments
 from ..auth import get_current_user, get_current_approved_user
 
 router = APIRouter(prefix="/api", tags=["comments"])
+
+
+@router.get("/comments/recent", response_model=PaginatedComments)
+def recent_comments(
+    offset: int = Query(0, ge=0),
+    limit: int = Query(20, ge=1, le=50),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    base_query = (
+        db.query(Comment)
+        .join(Statement, Comment.statement_id == Statement.id)
+        .filter(Statement.is_archived == False)
+    )
+
+    total = base_query.count()
+
+    items = (
+        base_query
+        .options(joinedload(Comment.author), joinedload(Comment.statement))
+        .order_by(Comment.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
+    return PaginatedComments(items=items, total=total, offset=offset, limit=limit)
 
 
 @router.get("/statements/{statement_id}/comments", response_model=List[CommentResponse])

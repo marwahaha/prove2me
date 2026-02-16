@@ -539,6 +539,76 @@ a:hover {
   background: #f0f0f0;
 }
 
+/* Recent comments feed */
+.recent-comments {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.recent-comment-row {
+  padding: 8px 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.recent-comment-row:last-child {
+  border-bottom: none;
+}
+
+.recent-comment-body {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: #333;
+}
+
+.recent-comment-body p {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recent-comment-meta {
+  font-size: 0.8rem;
+  color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 1px;
+}
+
+.recent-comment-statement {
+  color: #0066cc;
+}
+
+.recent-comment-time {
+  color: #999;
+  margin-left: 6px;
+}
+
+.recent-comment-time::before {
+  content: "·";
+  margin-right: 6px;
+}
+
+.recent-comments-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.recent-comments-range {
+  font-size: 0.85rem;
+  color: #666;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .header .container {

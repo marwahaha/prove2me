@@ -167,6 +167,34 @@ class BannerUpdate(BaseModel):
     message: str
 
 
+# Statement stub for recent comments
+class StatementStub(BaseModel):
+    id: UUID
+    title: str
+
+    class Config:
+        from_attributes = True
+
+
+class RecentCommentResponse(BaseModel):
+    id: UUID
+    content: str
+    author: UserPublic
+    statement: StatementStub
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class PaginatedComments(BaseModel):
+    items: list[RecentCommentResponse]
+    total: int
+    offset: int
+    limit: int
+
+
 # Comment schemas
 class CommentCreate(BaseModel):
     content: str

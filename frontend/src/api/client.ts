@@ -80,6 +80,27 @@ export interface Comment {
   updated_at: string | null;
 }
 
+export interface StatementStub {
+  id: string;
+  title: string;
+}
+
+export interface RecentComment {
+  id: string;
+  content: string;
+  author: UserPublic;
+  statement: StatementStub;
+  created_at: string;
+  updated_at: string | null;
+}
+
+export interface PaginatedComments {
+  items: RecentComment[];
+  total: number;
+  offset: number;
+  limit: number;
+}
+
 export interface PrizeSettings {
   base_points: number;
   growth_rate: number;
@@ -246,6 +267,9 @@ export const adminApi = {
 
 // Comments API
 export const commentsApi = {
+  recent: (offset = 0, limit = 15) =>
+    request<PaginatedComments>(`/comments/recent?offset=${offset}&limit=${limit}`),
+
   list: (statementId: string) =>
     request<Comment[]>(`/statements/${statementId}/comments`),
 

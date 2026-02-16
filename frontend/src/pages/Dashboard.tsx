@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { statementsApi, StatementListItem } from '../api/client';
 import StatementCard from '../components/StatementCard';
+import RecentComments from '../components/RecentComments';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
@@ -80,6 +81,8 @@ export default function Dashboard() {
           ))}
         </div>
       )}
+
+      <RecentComments />
     </div>
   );
 }

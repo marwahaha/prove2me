@@ -143,6 +143,10 @@ def compile_proof(statement_code: str, proof_code: str, theorem_name: str, defin
     if imports and "admit" in imports:
         return False, "Imports cannot contain 'admit'"
 
+    # Verify the theorem name actually appears in the proof code
+    if not re.search(r'\b' + re.escape(theorem_name) + r'\b', proof_code):
+        return False, f"Theorem '{theorem_name}' must be defined in your proof code"
+
     # Check for axiom declarations - users could cheat by declaring arbitrary axioms
     if re.search(r'\baxiom\b', proof_code):
         return False, "Proof cannot contain axiom declarations"

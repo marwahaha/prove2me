@@ -9,6 +9,7 @@ DEFAULT_SETTINGS = {
     "growth_rate": 1.50,
     "submitter_share": 0.20,
     "max_statements_per_day": 3,
+    "min_proofs_to_submit": 0,
 }
 
 

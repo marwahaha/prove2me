@@ -159,6 +159,14 @@ def update_settings(
             )
         set_prize_setting(db, "max_statements_per_day", settings_data.max_statements_per_day)
 
+    if settings_data.min_proofs_to_submit is not None:
+        if settings_data.min_proofs_to_submit < 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="min_proofs_to_submit must be at least 0"
+            )
+        set_prize_setting(db, "min_proofs_to_submit", settings_data.min_proofs_to_submit)
+
     settings = get_prize_settings(db)
     return SettingsResponse(**settings)
 

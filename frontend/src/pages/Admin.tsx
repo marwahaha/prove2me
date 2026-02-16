@@ -21,6 +21,7 @@ export default function Admin() {
   const [growthRate, setGrowthRate] = useState('');
   const [submitterShare, setSubmitterShare] = useState('');
   const [maxStatementsPerDay, setMaxStatementsPerDay] = useState('');
+  const [minProofsToSubmit, setMinProofsToSubmit] = useState('');
   const [savingSettings, setSavingSettings] = useState(false);
 
   useEffect(() => {
@@ -47,6 +48,7 @@ export default function Admin() {
       setGrowthRate(settingsData.growth_rate.toString());
       setSubmitterShare((settingsData.submitter_share * 100).toString());
       setMaxStatementsPerDay(settingsData.max_statements_per_day.toString());
+      setMinProofsToSubmit(settingsData.min_proofs_to_submit.toString());
     } catch (error: any) {
       toast.error('Failed to load admin data');
     } finally {
@@ -119,6 +121,7 @@ export default function Admin() {
         growth_rate: parseFloat(growthRate),
         submitter_share: parseFloat(submitterShare) / 100,
         max_statements_per_day: parseInt(maxStatementsPerDay),
+        min_proofs_to_submit: parseInt(minProofsToSubmit),
       });
       setSettings(updatedSettings);
       toast.success('Settings saved');
@@ -352,6 +355,18 @@ export default function Admin() {
                   />
                   <small style={{ color: '#666' }}>Maximum statements a user can submit per 24 hours</small>
                 </div>
+
+                <div className="form-group">
+                  <label htmlFor="minProofsToSubmit">Min Proofs to Submit Statements</label>
+                  <input
+                    type="number"
+                    id="minProofsToSubmit"
+                    value={minProofsToSubmit}
+                    onChange={(e) => setMinProofsToSubmit(e.target.value)}
+                    min="0"
+                  />
+                  <small style={{ color: '#666' }}>Minimum proofs a user must solve before submitting statements (0 = no restriction)</small>
+                </div>
               </div>
 
               <button
@@ -373,6 +388,7 @@ export default function Admin() {
                   <li>Submitter Share: {(settings.submitter_share * 100).toFixed(0)}%</li>
                   <li>Prover Share: {((1 - settings.submitter_share) * 100).toFixed(0)}%</li>
                   <li>Max Statements Per Day: {settings.max_statements_per_day}</li>
+                  <li>Min Proofs to Submit: {settings.min_proofs_to_submit}</li>
                 </ul>
               </div>
             )}

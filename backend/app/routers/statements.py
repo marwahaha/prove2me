@@ -196,6 +196,17 @@ def create_statement(
                 detail=f"You can only submit {max_per_day} statements per 24 hours"
             )
 
+        min_proofs = settings["min_proofs_to_submit"]
+        if min_proofs > 0:
+            solved_count = db.query(Statement).filter(
+                Statement.solver_id == current_user.id
+            ).count()
+            if solved_count < min_proofs:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=f"You must prove at least {min_proofs} statement(s) before submitting your own. You have proven {solved_count}."
+                )
+
     # Compile the statement with definitions
     success, error = compile_statement(statement_data.lean_code, statement_data.definitions)
 

@@ -128,6 +128,7 @@ class SettingsResponse(BaseModel):
     growth_rate: float
     submitter_share: float
     max_statements_per_day: int
+    min_proofs_to_submit: int
 
 
 class SettingsUpdate(BaseModel):
@@ -135,6 +136,7 @@ class SettingsUpdate(BaseModel):
     growth_rate: Optional[float] = None
     submitter_share: Optional[float] = None
     max_statements_per_day: Optional[int] = None
+    min_proofs_to_submit: Optional[int] = None
 
 
 class StatementTitleUpdate(BaseModel):

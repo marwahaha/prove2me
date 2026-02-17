@@ -122,7 +122,7 @@ def compile_statement(statement_code: str, definitions: str = None) -> tuple[boo
     return True, ""
 
 
-def compile_proof(statement_code: str, proof_code: str, theorem_name: str, definitions: str = None, imports: str = None) -> tuple[bool, str]:
+def compile_proof(statement_code: str, proof_code: str, theorem_name: str, definitions: str = None, imports: str = None, is_disproof: bool = False) -> tuple[bool, str]:
     """
     Validate a proof:
     1. Must be valid Lean syntax
@@ -167,7 +167,7 @@ def _statement : Prop := {statement_code}
 {proof_code}
 
 -- Verify the theorem has exactly the type of the statement
-#check ({theorem_name} : _statement)
+#check ({theorem_name} : {"¬ _statement" if is_disproof else "_statement"})
 """
 
     success, error = run_lean(wrapped_code)

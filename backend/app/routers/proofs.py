@@ -49,7 +49,8 @@ def submit_proof(
         proof_data.lean_code,
         proof_data.theorem_name,
         statement.definitions,
-        proof_data.imports
+        proof_data.imports,
+        proof_data.is_disproof
     )
 
     if not success:
@@ -65,6 +66,7 @@ def submit_proof(
 
     # Update statement
     statement.is_solved = True
+    statement.is_disproved = proof_data.is_disproof
     statement.solved_at = datetime.utcnow()
     statement.solver_id = current_user.id
     statement.proof_code = proof_data.lean_code

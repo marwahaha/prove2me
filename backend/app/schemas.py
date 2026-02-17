@@ -79,6 +79,7 @@ class StatementResponse(BaseModel):
     lean_code: str
     submitter: UserPublic
     is_solved: bool
+    is_disproved: bool = False
     solved_at: Optional[datetime]
     solver: Optional[UserPublic]
     proof_code: Optional[str] = None
@@ -99,6 +100,7 @@ class StatementListItem(BaseModel):
     title: str
     submitter: UserPublic
     is_solved: bool
+    is_disproved: bool = False
     solver: Optional[UserPublic] = None
     created_at: datetime
     solved_at: Optional[datetime] = None
@@ -114,6 +116,7 @@ class ProofSubmit(BaseModel):
     lean_code: str
     theorem_name: str
     imports: Optional[str] = None
+    is_disproof: bool = False
 
 
 class ProofResult(BaseModel):

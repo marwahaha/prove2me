@@ -87,7 +87,9 @@ export default function StatementCard({ statement, onTagClick, onTagsChanged }: 
         <span className="statement-row-time">{formatTimeAgo(statement.created_at)}</span>
       </span>
       {statement.is_solved && statement.solver ? (
-        <span className="prize-badge solved">Solved</span>
+        <span className={`prize-badge ${statement.is_disproved ? 'disproved' : 'solved'}`}>
+          {statement.is_disproved ? 'Disproved' : 'Proved'}
+        </span>
       ) : statement.current_prize ? (
         <span className="prize-badge">{statement.current_prize} pts</span>
       ) : null}

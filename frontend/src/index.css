@@ -278,6 +278,10 @@ a:hover {
   background: #4CAF50;
 }
 
+.prize-badge.disproved {
+  background: #dc3545;
+}
+
 /* Page titles */
 .page-header {
   display: flex;

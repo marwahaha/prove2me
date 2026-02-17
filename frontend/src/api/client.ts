@@ -23,6 +23,7 @@ export interface Statement {
   lean_code: string;
   submitter: UserPublic;
   is_solved: boolean;
+  is_disproved: boolean;
   solved_at: string | null;
   solver: UserPublic | null;
   proof_code: string | null;
@@ -40,6 +41,7 @@ export interface StatementListItem {
   title: string;
   submitter: UserPublic;
   is_solved: boolean;
+  is_disproved: boolean;
   solver: UserPublic | null;
   created_at: string;
   solved_at: string | null;
@@ -196,10 +198,10 @@ export const statementsApi = {
 
 // Proofs API
 export const proofsApi = {
-  submit: (statementId: string, lean_code: string, theorem_name: string, imports?: string) =>
+  submit: (statementId: string, lean_code: string, theorem_name: string, imports?: string, is_disproof?: boolean) =>
     request<ProofResult>(`/proofs/${statementId}`, {
       method: 'POST',
-      body: JSON.stringify({ lean_code, theorem_name, imports }),
+      body: JSON.stringify({ lean_code, theorem_name, imports, is_disproof: is_disproof || false }),
     }),
 };
 

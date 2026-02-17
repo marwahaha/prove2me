@@ -18,6 +18,7 @@ export default function StatementDetail() {
   const [proofCode, setProofCode] = useState('');
   const [theoremName, setTheoremName] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [isDisproof, setIsDisproof] = useState(false);
   const [proofResult, setProofResult] = useState<{ success: boolean; message: string } | null>(null);
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState('');
@@ -63,7 +64,7 @@ export default function StatementDetail() {
     setProofResult(null);
 
     try {
-      const result = await proofsApi.submit(id, proofCode, theoremName.trim(), imports || undefined);
+      const result = await proofsApi.submit(id, proofCode, theoremName.trim(), imports || undefined, isDisproof);
       setProofResult(result);
 
       if (result.success) {
@@ -71,7 +72,7 @@ export default function StatementDetail() {
         await refreshUser();
         await loadStatement();
       } else {
-        toast.error('Proof rejected');
+        toast.error(result.message);
       }
     } catch (error: any) {
       toast.error(error.message || 'Failed to submit proof');
@@ -215,8 +216,8 @@ export default function StatementDetail() {
               )}
             </h1>
           )}
-          <span className={`prize-badge ${statement.is_solved ? 'solved' : ''}`}>
-            {statement.is_solved ? 'Solved' : `${statement.current_prize} pts`}
+          <span className={`prize-badge ${statement.is_solved ? (statement.is_disproved ? 'disproved' : 'solved') : ''}`}>
+            {statement.is_solved ? (statement.is_disproved ? 'Disproved' : 'Proved') : `${statement.current_prize} pts`}
           </span>
         </div>
 
@@ -225,7 +226,7 @@ export default function StatementDetail() {
           {statement.is_solved && statement.solver && (
             <>
               <span>·</span>
-              <span>Solved by <Link to={`/user/${statement.solver.username}`}>{statement.solver.username}</Link> ({formatTimeAgo(statement.solved_at!)})</span>
+              <span>{statement.is_disproved ? 'Disproved' : 'Proved'} by <Link to={`/user/${statement.solver.username}`}>{statement.solver.username}</Link> ({formatTimeAgo(statement.solved_at!)})</span>
             </>
           )}
           {statement.updated_at && (
@@ -318,10 +319,10 @@ export default function StatementDetail() {
 
       {statement.is_solved ? (
         <div className="card">
-          <div className="success-message" style={{ marginBottom: '20px' }}>
-            Solved by <Link to={`/user/${statement.solver?.username}`}>{statement.solver?.username}</Link> on {new Date(statement.solved_at!).toLocaleDateString()}
+          <div className={statement.is_disproved ? 'error-message' : 'success-message'} style={{ marginBottom: '20px' }}>
+            {statement.is_disproved ? 'Disproved' : 'Proved'} by <Link to={`/user/${statement.solver?.username}`}>{statement.solver?.username}</Link> on {new Date(statement.solved_at!).toLocaleDateString()}
           </div>
-          <h3 style={{ marginBottom: '10px' }}>Proof</h3>
+          <h3 style={{ marginBottom: '10px' }}>{statement.is_disproved ? 'Disproof' : 'Proof'}</h3>
           {statement.proof_theorem_name && (
             <p style={{ marginBottom: '10px', color: '#666' }}>
               Theorem: <code>{statement.proof_theorem_name}</code>
@@ -397,7 +398,22 @@ theorem my_proof : ∀ n : Nat, n + 0 = n := by
                 required
               />
               <small style={{ color: '#666', display: 'block', marginTop: '5px' }}>
-                The name of the theorem in your code that proves the proposition
+                The name of the theorem in your code that proves (or disproves) the proposition
+              </small>
+            </div>
+
+            <div className="form-group">
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={isDisproof}
+                  onChange={(e) => setIsDisproof(e.target.checked)}
+                  style={{ width: 'auto' }}
+                />
+                Disproof?
+              </label>
+              <small style={{ color: '#666', display: 'block', marginTop: '5px' }}>
+                Check this if your code proves the negation (¬) of the proposition
               </small>
             </div>
 

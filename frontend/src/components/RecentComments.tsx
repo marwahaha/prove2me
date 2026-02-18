@@ -4,7 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import { commentsApi, RecentComment } from '../api/client';
-import { formatTimeAgo } from '../utils/time';
+import { formatTimeAgo, formatExactTime } from '../utils/time';
 
 const PAGE_SIZE = 5;
 
@@ -63,7 +63,7 @@ export default function RecentComments() {
                 <Link to={`/statement/${comment.statement.id}`} className="recent-comment-statement">
                   {comment.statement.title}
                 </Link>
-                <span className="recent-comment-time">{formatTimeAgo(comment.created_at)}</span>
+                <span className="recent-comment-time" title={formatExactTime(comment.created_at)}>{formatTimeAgo(comment.created_at)}</span>
               </div>
             </div>
           ))}

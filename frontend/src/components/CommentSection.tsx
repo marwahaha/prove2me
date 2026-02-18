@@ -4,7 +4,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { commentsApi, Comment } from '../api/client';
-import { formatTimeAgo } from '../utils/time';
+import { formatTimeAgo, formatExactTime } from '../utils/time';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -114,7 +114,7 @@ export default function CommentSection({ statementId }: Props) {
                     <span style={{ fontSize: '0.85rem', color: '#666' }}>
                       <strong style={{ color: '#333' }}>{comment.author.username}</strong>
                       {' · '}
-                      {formatTimeAgo(comment.created_at)}
+                      <span title={formatExactTime(comment.created_at)}>{formatTimeAgo(comment.created_at)}</span>
                       {comment.updated_at && ' (edited)'}
                     </span>
                     <div style={{ display: 'flex', gap: '6px' }}>

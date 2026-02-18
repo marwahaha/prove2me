@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { StatementListItem, tagsApi } from '../api/client';
-import { formatTimeAgo } from '../utils/time';
+import { formatTimeAgo, formatExactTime } from '../utils/time';
 import { useAuth } from '../contexts/AuthContext';
 import TagInput from './TagInput';
 import toast from 'react-hot-toast';
@@ -84,7 +84,7 @@ export default function StatementCard({ statement, onTagClick, onTagsChanged }: 
       </div>
       <span className="statement-row-meta">
         <Link to={`/user/${statement.submitter.username}`} onClick={(e) => e.stopPropagation()} className="username-link">{statement.submitter.username}</Link>
-        <span className="statement-row-time">{formatTimeAgo(statement.created_at)}</span>
+        <span className="statement-row-time" title={formatExactTime(statement.is_solved && statement.solved_at ? statement.solved_at : statement.created_at)}>{formatTimeAgo(statement.is_solved && statement.solved_at ? statement.solved_at : statement.created_at)}</span>
       </span>
       {statement.is_solved && statement.solver ? (
         <span className={`prize-badge ${statement.is_disproved ? 'disproved' : 'solved'}`}>

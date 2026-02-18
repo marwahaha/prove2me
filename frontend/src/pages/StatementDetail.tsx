@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { statementsApi, proofsApi, adminApi, tagsApi, Statement } from '../api/client';
-import { formatTimeAgo } from '../utils/time';
+import { formatTimeAgo, formatExactTime } from '../utils/time';
 import { useAuth } from '../contexts/AuthContext';
 import CodeEditor from '../components/CodeEditor';
 import CommentSection from '../components/CommentSection';
@@ -222,17 +222,17 @@ export default function StatementDetail() {
         </div>
 
         <div className="statement-meta" style={{ marginBottom: '20px', display: 'flex', gap: '8px', flexWrap: 'wrap', color: '#666', fontSize: '0.9rem' }}>
-          <span>Submitted by <Link to={`/user/${statement.submitter.username}`}>{statement.submitter.username}</Link> ({formatTimeAgo(statement.created_at)})</span>
+          <span>Submitted by <Link to={`/user/${statement.submitter.username}`}>{statement.submitter.username}</Link> (<span title={formatExactTime(statement.created_at)}>{formatTimeAgo(statement.created_at)}</span>)</span>
           {statement.is_solved && statement.solver && (
             <>
               <span>·</span>
-              <span>{statement.is_disproved ? 'Disproved' : 'Proved'} by <Link to={`/user/${statement.solver.username}`}>{statement.solver.username}</Link> ({formatTimeAgo(statement.solved_at!)})</span>
+              <span>{statement.is_disproved ? 'Disproved' : 'Proved'} by <Link to={`/user/${statement.solver.username}`}>{statement.solver.username}</Link> (<span title={formatExactTime(statement.solved_at!)}>{formatTimeAgo(statement.solved_at!)}</span>)</span>
             </>
           )}
           {statement.updated_at && (
             <>
               <span>·</span>
-              <span>(edited by {statement.last_edited_by?.username ?? 'admin'} {formatTimeAgo(statement.updated_at)})</span>
+              <span>(edited by {statement.last_edited_by?.username ?? 'admin'} <span title={formatExactTime(statement.updated_at!)}>{formatTimeAgo(statement.updated_at!)}</span>)</span>
             </>
           )}
         </div>

@@ -83,7 +83,10 @@ export default function StatementCard({ statement, onTagClick, onTagsChanged }: 
         )}
       </div>
       <span className="statement-row-meta">
-        <Link to={`/user/${statement.submitter.username}`} onClick={(e) => e.stopPropagation()} className="username-link">{statement.submitter.username}</Link>
+        {(() => {
+          const displayUser = statement.is_solved && statement.solver ? statement.solver : statement.submitter;
+          return <Link to={`/user/${displayUser.username}`} onClick={(e) => e.stopPropagation()} className="username-link">{displayUser.username}</Link>;
+        })()}
         <span className="statement-row-time" title={formatExactTime(statement.is_solved && statement.solved_at ? statement.solved_at : statement.created_at)}>{formatTimeAgo(statement.is_solved && statement.solved_at ? statement.solved_at : statement.created_at)}</span>
       </span>
       {statement.is_solved && statement.solver ? (

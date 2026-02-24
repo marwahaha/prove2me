@@ -50,6 +50,8 @@ class Statement(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, nullable=True)
     last_edited_by_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    holding_period_ends_at = Column(DateTime, nullable=True)
+    gatekeeper_chat = Column(Text, nullable=True)
 
     submitter = relationship(
         "User",

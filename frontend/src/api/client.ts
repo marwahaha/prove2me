@@ -34,6 +34,8 @@ export interface Statement {
   last_edited_by: UserPublic | null;
   current_prize: number | null;
   tags: string[];
+  holding_period_ends_at: string | null;
+  in_holding_period: boolean;
 }
 
 export interface StatementListItem {
@@ -47,6 +49,8 @@ export interface StatementListItem {
   solved_at: string | null;
   current_prize: number | null;
   tags: string[];
+  holding_period_ends_at: string | null;
+  in_holding_period: boolean;
 }
 
 export interface UserProfileResponse {
@@ -109,6 +113,9 @@ export interface PrizeSettings {
   submitter_share: number;
   max_statements_per_day: number;
   min_proofs_to_submit: number;
+  holding_period_minutes: number;
+  gatekeeper_username: string;
+  harmonic_enabled: boolean;
 }
 
 class ApiError extends Error {
@@ -133,7 +140,14 @@ async function request<T>(
 
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
-    throw new ApiError(response.status, data.detail || 'An error occurred');
+    let message = 'An error occurred';
+    if (typeof data.detail === 'string') {
+      message = data.detail;
+    } else if (Array.isArray(data.detail)) {
+      // FastAPI 422 validation errors: array of { loc, msg, type }
+      message = data.detail.map((e: any) => e.msg).join('; ');
+    }
+    throw new ApiError(response.status, message);
   }
 
   return response.json();

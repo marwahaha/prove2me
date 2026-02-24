@@ -36,6 +36,13 @@ def submit_proof(
             detail="Statement has already been solved"
         )
 
+    # Check holding period
+    if statement.holding_period_ends_at and statement.holding_period_ends_at > datetime.utcnow():
+        raise HTTPException(
+            status_code=status.HTTP_423_LOCKED,
+            detail=f"Statement is in automated review. Proof submissions open after {statement.holding_period_ends_at.isoformat()}Z"
+        )
+
     # Cannot prove own statement
     if statement.submitter_id == current_user.id:
         raise HTTPException(

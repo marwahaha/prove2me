@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import desc, func
@@ -19,6 +20,14 @@ def _build_tags(statement: Statement) -> list[str]:
     tags = [tag.tag_name for tag in getattr(statement, 'tags', []) or []]
     tags.sort(key=str.lower)
     return tags
+
+
+def _compute_in_holding_period(statement: Statement) -> bool:
+    """Return True if statement is currently in its holding period."""
+    return (
+        statement.holding_period_ends_at is not None
+        and statement.holding_period_ends_at > datetime.utcnow()
+    )
 
 
 def add_current_prize(statement: Statement, db: Session) -> dict:
@@ -44,6 +53,8 @@ def add_current_prize(statement: Statement, db: Session) -> dict:
         "last_edited_by": statement.last_edited_by,
         "current_prize": prize,
         "tags": _build_tags(statement),
+        "holding_period_ends_at": statement.holding_period_ends_at,
+        "in_holding_period": _compute_in_holding_period(statement),
     }
 
 
@@ -63,6 +74,8 @@ def add_current_prize_list_item(statement: Statement, db: Session) -> dict:
         "solved_at": statement.solved_at,
         "current_prize": prize,
         "tags": _build_tags(statement),
+        "holding_period_ends_at": statement.holding_period_ends_at,
+        "in_holding_period": _compute_in_holding_period(statement),
     }
 
 
@@ -175,7 +188,7 @@ def get_statement(
 
 
 @router.post("", response_model=StatementResponse)
-def create_statement(
+async def create_statement(
     statement_data: StatementCreate,
     current_user: User = Depends(get_current_approved_user),
     db: Session = Depends(get_db)
@@ -228,6 +241,18 @@ def create_statement(
     db.add(statement)
     db.commit()
     db.refresh(statement)
+
+    # Optionally start gatekeeper holding period
+    settings = get_prize_settings(db)
+    harmonic_enabled = settings.get("harmonic_enabled", True)
+    holding_period_minutes = settings.get("holding_period_minutes", 10)
+
+    if harmonic_enabled and holding_period_minutes > 0:
+        from ..gatekeeper import run_gatekeeper
+        statement.holding_period_ends_at = statement.created_at + timedelta(minutes=holding_period_minutes)
+        db.commit()
+        db.refresh(statement)
+        asyncio.create_task(run_gatekeeper(statement.id))
 
     return add_current_prize(statement, db)
 

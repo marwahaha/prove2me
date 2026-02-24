@@ -22,6 +22,9 @@ export default function Admin() {
   const [submitterShare, setSubmitterShare] = useState('');
   const [maxStatementsPerDay, setMaxStatementsPerDay] = useState('');
   const [minProofsToSubmit, setMinProofsToSubmit] = useState('');
+  const [holdingPeriodMinutes, setHoldingPeriodMinutes] = useState('');
+  const [gatekeeperUsername, setGatekeeperUsername] = useState('');
+  const [harmonicEnabled, setHarmonicEnabled] = useState(false);
   const [savingSettings, setSavingSettings] = useState(false);
 
   useEffect(() => {
@@ -49,6 +52,9 @@ export default function Admin() {
       setSubmitterShare((settingsData.submitter_share * 100).toString());
       setMaxStatementsPerDay(settingsData.max_statements_per_day.toString());
       setMinProofsToSubmit(settingsData.min_proofs_to_submit.toString());
+      setHoldingPeriodMinutes(settingsData.holding_period_minutes.toString());
+      setGatekeeperUsername(settingsData.gatekeeper_username);
+      setHarmonicEnabled(settingsData.harmonic_enabled);
     } catch (error: any) {
       toast.error('Failed to load admin data');
     } finally {
@@ -122,6 +128,9 @@ export default function Admin() {
         submitter_share: parseFloat(submitterShare) / 100,
         max_statements_per_day: parseInt(maxStatementsPerDay),
         min_proofs_to_submit: parseInt(minProofsToSubmit),
+        holding_period_minutes: parseInt(holdingPeriodMinutes),
+        gatekeeper_username: gatekeeperUsername,
+        harmonic_enabled: harmonicEnabled,
       });
       setSettings(updatedSettings);
       toast.success('Settings saved');
@@ -367,6 +376,44 @@ export default function Admin() {
                   />
                   <small style={{ color: '#666' }}>Minimum proofs a user must solve before submitting statements (0 = no restriction)</small>
                 </div>
+
+                <div className="form-group">
+                  <label htmlFor="holdingPeriodMinutes">Holding Period (minutes)</label>
+                  <input
+                    type="number"
+                    id="holdingPeriodMinutes"
+                    value={holdingPeriodMinutes}
+                    onChange={(e) => setHoldingPeriodMinutes(e.target.value)}
+                    min="0"
+                  />
+                  <small style={{ color: '#666' }}>How long the automated prover has exclusive access after submission (0 = disabled)</small>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="gatekeeperUsername">Gatekeeper Username</label>
+                  <input
+                    type="text"
+                    id="gatekeeperUsername"
+                    value={gatekeeperUsername}
+                    onChange={(e) => setGatekeeperUsername(e.target.value)}
+                    placeholder="admin"
+                  />
+                  <small style={{ color: '#666' }}>Username that automated proofs are attributed to</small>
+                </div>
+
+                <div className="form-group">
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      id="harmonicEnabled"
+                      checked={harmonicEnabled}
+                      onChange={(e) => setHarmonicEnabled(e.target.checked)}
+                      style={{ width: 'auto' }}
+                    />
+                    Enable Harmonic Aristotle Auto-Prover
+                  </label>
+                  <small style={{ color: '#666' }}>When enabled, new statements are sent to the Aristotle API during the holding period</small>
+                </div>
               </div>
 
               <button
@@ -389,6 +436,9 @@ export default function Admin() {
                   <li>Prover Share: {((1 - settings.submitter_share) * 100).toFixed(0)}%</li>
                   <li>Max Statements Per Day: {settings.max_statements_per_day}</li>
                   <li>Min Proofs to Submit: {settings.min_proofs_to_submit}</li>
+                  <li>Holding Period: {settings.holding_period_minutes} minutes</li>
+                  <li>Gatekeeper Username: {settings.gatekeeper_username}</li>
+                  <li>Harmonic Auto-Prover: {settings.harmonic_enabled ? 'Enabled' : 'Disabled'}</li>
                 </ul>
               </div>
             )}

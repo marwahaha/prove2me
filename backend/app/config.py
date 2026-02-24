@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     lean_project_path: str = "/Users/macbookpro/prove2me/prove2me_lean"
     lean_bin_path: str = ""  # e.g., /home/user/.elan/bin - leave empty to use system PATH
     lean_timeout: int = 120
+    aristotle_api_key: str = ""
 
     class Config:
         env_file = ".env"

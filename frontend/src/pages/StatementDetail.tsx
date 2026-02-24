@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { statementsApi, proofsApi, adminApi, tagsApi, Statement } from '../api/client';
-import { formatTimeAgo, formatExactTime } from '../utils/time';
+import { formatTimeAgo, formatExactTime, formatTimeUntil } from '../utils/time';
 import { useAuth } from '../contexts/AuthContext';
 import CodeEditor from '../components/CodeEditor';
 import CommentSection from '../components/CommentSection';
@@ -346,6 +346,14 @@ export default function StatementDetail() {
             readOnly
             height="300px"
           />
+        </div>
+      ) : statement.in_holding_period ? (
+        <div className="card">
+          <div className="info-message" style={{ padding: '16px', background: '#fff8e1', border: '1px solid #ffc107', borderRadius: '6px', color: '#5a4200' }}>
+            <strong>Automated review in progress.</strong><br />
+            Our automated prover is attempting this statement.
+            Proof submissions will open {formatTimeUntil(statement.holding_period_ends_at!)}.
+          </div>
         </div>
       ) : isOwnStatement ? (
         <div className="card">

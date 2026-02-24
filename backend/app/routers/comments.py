@@ -7,6 +7,7 @@ from ..database import get_db
 from ..models import User, Statement, Comment
 from ..schemas import CommentCreate, CommentUpdate, CommentResponse, PaginatedComments
 from ..auth import get_current_user, get_current_approved_user
+from ..prize import get_prize_settings
 
 router = APIRouter(prefix="/api", tags=["comments"])
 
@@ -18,11 +19,17 @@ def recent_comments(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    settings = get_prize_settings(db)
+    gatekeeper_username = settings.get("gatekeeper_username", "admin")
+    gatekeeper_user = db.query(User).filter(User.username == gatekeeper_username).first()
+
     base_query = (
         db.query(Comment)
         .join(Statement, Comment.statement_id == Statement.id)
         .filter(Statement.is_archived == False)
     )
+    if gatekeeper_user:
+        base_query = base_query.filter(Comment.author_id != gatekeeper_user.id)
 
     total = base_query.count()
 

@@ -167,6 +167,33 @@ def update_settings(
             )
         set_prize_setting(db, "min_proofs_to_submit", settings_data.min_proofs_to_submit)
 
+    if settings_data.holding_period_minutes is not None:
+        if settings_data.holding_period_minutes < 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="holding_period_minutes must be at least 0"
+            )
+        set_prize_setting(db, "holding_period_minutes", settings_data.holding_period_minutes)
+
+    if settings_data.gatekeeper_username is not None:
+        if not settings_data.gatekeeper_username.strip():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="gatekeeper_username cannot be empty"
+            )
+        gk_user = db.query(User).filter(
+            User.username == settings_data.gatekeeper_username
+        ).first()
+        if not gk_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"User '{settings_data.gatekeeper_username}' does not exist"
+            )
+        set_prize_setting(db, "gatekeeper_username", settings_data.gatekeeper_username)
+
+    if settings_data.harmonic_enabled is not None:
+        set_prize_setting(db, "harmonic_enabled", settings_data.harmonic_enabled)
+
     settings = get_prize_settings(db)
     return SettingsResponse(**settings)
 

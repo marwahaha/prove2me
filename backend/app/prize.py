@@ -10,6 +10,9 @@ DEFAULT_SETTINGS = {
     "submitter_share": 0.20,
     "max_statements_per_day": 3,
     "min_proofs_to_submit": 0,
+    "holding_period_minutes": 10,
+    "gatekeeper_username": "admin",
+    "harmonic_enabled": True,
 }
 
 

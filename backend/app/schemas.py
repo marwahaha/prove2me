@@ -90,6 +90,8 @@ class StatementResponse(BaseModel):
     last_edited_by: Optional[UserPublic] = None
     current_prize: Optional[int] = None
     tags: list[str] = []
+    holding_period_ends_at: Optional[datetime] = None
+    in_holding_period: bool = False
 
     class Config:
         from_attributes = True
@@ -106,6 +108,8 @@ class StatementListItem(BaseModel):
     solved_at: Optional[datetime] = None
     current_prize: Optional[int] = None
     tags: list[str] = []
+    holding_period_ends_at: Optional[datetime] = None
+    in_holding_period: bool = False
 
     class Config:
         from_attributes = True
@@ -143,6 +147,9 @@ class SettingsResponse(BaseModel):
     submitter_share: float
     max_statements_per_day: int
     min_proofs_to_submit: int
+    holding_period_minutes: Optional[int] = None
+    gatekeeper_username: Optional[str] = None
+    harmonic_enabled: Optional[bool] = None
 
 
 class SettingsUpdate(BaseModel):
@@ -151,6 +158,9 @@ class SettingsUpdate(BaseModel):
     submitter_share: Optional[float] = None
     max_statements_per_day: Optional[int] = None
     min_proofs_to_submit: Optional[int] = None
+    holding_period_minutes: Optional[int] = None
+    gatekeeper_username: Optional[str] = None
+    harmonic_enabled: Optional[bool] = None
 
 
 class StatementTitleUpdate(BaseModel):

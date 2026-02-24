@@ -7,6 +7,13 @@ import { commentsApi, RecentComment } from '../api/client';
 import { formatTimeAgo, formatExactTime } from '../utils/time';
 
 const PAGE_SIZE = 5;
+const PREVIEW_LINES = 3;
+
+function truncateComment(content: string): { text: string; truncated: boolean } {
+  const lines = content.split('\n');
+  if (lines.length <= PREVIEW_LINES) return { text: content, truncated: false };
+  return { text: lines.slice(0, PREVIEW_LINES).join('\n'), truncated: true };
+}
 
 export default function RecentComments() {
   const [comments, setComments] = useState<RecentComment[]>([]);
@@ -52,7 +59,7 @@ export default function RecentComments() {
             <div key={comment.id} className="recent-comment-row">
               <div className="recent-comment-body">
                 <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-                  {comment.content}
+                  {truncateComment(comment.content).text}
                 </ReactMarkdown>
               </div>
               <div className="recent-comment-meta">

@@ -8,3 +8,5 @@ pydantic-settings==2.1.0
 python-multipart==0.0.6
 bcrypt==4.1.2
 python-jose[cryptography]==3.3.0
+aristotlelib>=0.7.0
+httpx>=0.27.0

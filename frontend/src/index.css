@@ -295,6 +295,16 @@ a:hover {
   font-weight: 600;
 }
 
+.hide-gatekeeper-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  color: var(--text-secondary, #666);
+  cursor: pointer;
+  user-select: none;
+}
+
 /* Tables */
 .table {
   width: 100%;

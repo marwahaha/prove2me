@@ -7,6 +7,7 @@ export default function Solved() {
   const [statements, setStatements] = useState<StatementListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [hideGatekeeper, setHideGatekeeper] = useState(true);
 
   useEffect(() => {
     loadStatements();
@@ -31,10 +32,22 @@ export default function Solved() {
     );
   };
 
+  const visibleStatements = hideGatekeeper
+    ? statements.filter((s) => s.solver?.username !== 'gatekeeper')
+    : statements;
+
   return (
     <div className="container main-content">
       <div className="page-header">
         <h1 className="page-title">Solved Statements</h1>
+        <label className="hide-gatekeeper-toggle">
+          <input
+            type="checkbox"
+            checked={hideGatekeeper}
+            onChange={(e) => setHideGatekeeper(e.target.checked)}
+          />
+          Hide gatekeeper solutions
+        </label>
       </div>
 
       {selectedTags.length > 0 && (
@@ -51,13 +64,13 @@ export default function Solved() {
 
       {loading ? (
         <div className="loading">Loading statements...</div>
-      ) : statements.length === 0 ? (
+      ) : visibleStatements.length === 0 ? (
         <div className="card">
           <p>No statements have been solved yet.</p>
         </div>
       ) : (
         <div className="statement-list">
-          {statements.map((statement) => (
+          {visibleStatements.map((statement) => (
             <StatementCard
               key={statement.id}
               statement={statement}

@@ -216,6 +216,17 @@ async def run_gatekeeper(statement_id: UUID) -> None:
     """
     db = SessionLocal()
     try:
+        # Claim this statement atomically — only one worker should run the gatekeeper.
+        # If gatekeeper_chat is already set, another worker beat us to it.
+        claimed = db.query(Statement).filter(
+            Statement.id == statement_id,
+            Statement.gatekeeper_chat == None,
+        ).update({"gatekeeper_chat": "[]"})
+        db.commit()
+        if not claimed:
+            logger.info(f"Gatekeeper: statement {statement_id} already claimed by another worker, skipping")
+            return
+
         statement = db.query(Statement).filter(Statement.id == statement_id).first()
         if not statement or statement.holding_period_ends_at is None:
             logger.warning(f"Gatekeeper: statement {statement_id} not found or no holding period")

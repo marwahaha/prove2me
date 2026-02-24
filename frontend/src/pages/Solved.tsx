@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { statementsApi, StatementListItem } from '../api/client';
+import { statementsApi, adminApi, StatementListItem } from '../api/client';
 import StatementCard from '../components/StatementCard';
 import toast from 'react-hot-toast';
 
@@ -8,6 +8,13 @@ export default function Solved() {
   const [loading, setLoading] = useState(true);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [hideGatekeeper, setHideGatekeeper] = useState(true);
+  const [gatekeeperUsername, setGatekeeperUsername] = useState('gatekeeper');
+
+  useEffect(() => {
+    adminApi.getPublicSettings()
+      .then((s) => setGatekeeperUsername(s.gatekeeper_username))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     loadStatements();
@@ -33,7 +40,7 @@ export default function Solved() {
   };
 
   const visibleStatements = hideGatekeeper
-    ? statements.filter((s) => s.solver?.username !== 'gatekeeper')
+    ? statements.filter((s) => s.solver?.username !== gatekeeperUsername)
     : statements;
 
   return (

@@ -247,6 +247,8 @@ export const adminApi = {
       body: JSON.stringify({ new_password: newPassword }),
     }),
 
+  getPublicSettings: () => request<{ gatekeeper_username: string }>('/admin/public-settings'),
+
   getSettings: () => request<PrizeSettings>('/admin/settings'),
 
   updateSettings: (settings: Partial<PrizeSettings>) =>

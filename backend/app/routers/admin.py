@@ -120,6 +120,13 @@ def get_settings(
     return SettingsResponse(**settings)
 
 
+@router.get("/public-settings")
+def get_public_settings(db: Session = Depends(get_db)):
+    """Get publicly visible settings (no auth required)."""
+    settings = get_prize_settings(db)
+    return {"gatekeeper_username": settings.get("gatekeeper_username", "admin")}
+
+
 @router.put("/settings", response_model=SettingsResponse)
 def update_settings(
     settings_data: SettingsUpdate,

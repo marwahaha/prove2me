@@ -127,7 +127,7 @@ def try_compile_solution(statement: Statement, solution_text: str) -> tuple[bool
     Returns (success, is_disproof, error_or_None, imports_or_None).
     """
     proof_code, imports = _extract_proof_parts(solution_text)
-    error = None
+    errors: dict[str, str | None] = {}
     for is_disproof in (False, True):
         success, error = compile_proof(
             statement.lean_code,
@@ -139,7 +139,10 @@ def try_compile_solution(statement: Statement, solution_text: str) -> tuple[bool
         )
         if success:
             return True, is_disproof, None, imports
-    return False, False, error, imports
+        errors["disproof" if is_disproof else "proof"] = error
+    parts = [f"{label} direction: {err}" for label, err in errors.items() if err]
+    combined_error = "\n".join(parts) if parts else "Lean compilation failed"
+    return False, False, combined_error, imports
 
 
 def mark_solved_by_gatekeeper(
